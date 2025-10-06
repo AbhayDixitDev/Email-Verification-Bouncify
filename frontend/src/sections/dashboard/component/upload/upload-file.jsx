@@ -7,7 +7,7 @@ import axios, { endpoints } from 'src/utils/axios';
 import FileUpload from 'src/components/upload/upload';
 import { uploadList, pollJobStatus, startBulkVerification } from 'src/redux/slice/listSlice';
 
-export default function Upload({ setAlertState }) {
+export default function Upload({ setAlertState, onUpload }) {
   const dispatch = useDispatch();
   const [listName, setListName] = useState('');
   const [listNameError, setListNameError] = useState(false);
@@ -133,13 +133,17 @@ export default function Upload({ setAlertState }) {
                 const waitUntilReadyAndStart = async (attemptCount = 0, maxAttempts = 30) => {
                   if (attemptCount >= maxAttempts) {
                     throw new Error('Timeout: Bouncify did not report ready status');
+                    alert('Timeout: Bouncify did not report ready status');
                   }
+
 
                   try {
                     const statusRes = await axios.get(endpoints.list.getStatus, { params: { jobId } });
                     const reportStatus = statusRes?.data?.data?.report?.status;
                     if (reportStatus === 'ready') {
                       await dispatch(startBulkVerification(jobId)).unwrap();
+                      // await dispatch(pollJobStatus({ jobId }));
+                      onUpload();
                       return;
                     }
                     // Wait before next attempt
@@ -157,6 +161,7 @@ export default function Upload({ setAlertState }) {
                 waitUntilReadyAndStart()
                   .then(() => {
                     dispatch(pollJobStatus({ jobId }));
+                    
                     setAlertState({ open: true, color: 'success', title: 'Upload Success', message: 'Verification started', status: '' });
                   })
                   .catch((err2) => {

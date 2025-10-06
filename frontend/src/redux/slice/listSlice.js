@@ -132,6 +132,7 @@ export const fetchChartValues = createAsyncThunk(
   }
 )
 
+
 export const startBulkVerification = createAsyncThunk(
   'list/startVerification',
   async (jobId, { rejectWithValue }) => {

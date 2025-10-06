@@ -134,7 +134,7 @@ export default function Searchbar({ sx, ...other }) {
 
   return (
     <>
-      {/* {renderButton} */}
+      {renderButton}
 
       <Dialog
         fullWidth

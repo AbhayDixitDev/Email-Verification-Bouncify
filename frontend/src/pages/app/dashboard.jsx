@@ -275,11 +275,9 @@ export default function Page() {
               }
             />
             <Box sx={{ mt: 3 }}>
-              {activeTable === 'trash' ? (
-                <DashboardTrashTable />
-              ) : (
+              
                 <DashboardTable selectedFolder={selectedFolder} />
-              )}
+             
             </Box>
           </Grid>
         </Grid>
@@ -325,7 +323,7 @@ export default function Page() {
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ pt: 3 }}>
-          <Upload setAlertState={setAlertState} />
+          <Upload setAlertState={setAlertState} onUpload={() => handleDialogClose('bulkEmail')} />
         </DialogContent>
         <DialogActions>
           <Box
@@ -337,7 +335,7 @@ export default function Page() {
               justifyContent: 'flex-end',
             }}
           >
-            <Button variant="contained" color="primary">
+            <Button variant="contained" color="primary" onClick={() => handleDialogClose('bulkEmail')}>
               Upload
             </Button>
             <Button onClick={() => handleDialogClose('bulkEmail')} variant="outlined">

@@ -1,4 +1,6 @@
 import { useState, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+
 
 // MUI imports
 import {
@@ -48,6 +50,7 @@ const FOLDER_STRUCTURE = [
 ];
 
 export function DashboardTableToolbar({ filters, onResetPage, numSelected }) {
+  const dispatch = useDispatch();
 
   const isBelow600px = useMediaQuery('(max-width:600px)');
 
@@ -98,6 +101,10 @@ export function DashboardTableToolbar({ filters, onResetPage, numSelected }) {
 
   const handleDeleteClose = () => {
     setDeleteOpen(false);
+  };
+
+  const handleRefresh = () => {
+    dispatch();
   };
 
 
@@ -224,6 +231,7 @@ export function DashboardTableToolbar({ filters, onResetPage, numSelected }) {
               whiteSpace: 'nowrap',
               // width: isBelow600px ? '188px' : '188px',
             }}
+            onClick={handleRefresh}
             size="large"
             color="primary"
           >

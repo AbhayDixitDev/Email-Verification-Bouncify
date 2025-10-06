@@ -24,6 +24,7 @@ import { Iconify } from 'src/components/iconify';
 import { usePopover } from 'src/components/custom-popover';
 
 import { DashboardChart } from '../chart/dashboard-chart';
+import { startBulkVerification } from 'src/redux/slice/listSlice';
 
 // Custom backdrop for transparent background
 const CustomBackdrop = (props) => (
@@ -70,7 +71,7 @@ export function DashboardTableRow({
       case 'Unverified':
         onStartVerification();
         if (!row.requiresCredits) {
-          dispatch(startVerification());
+          dispatch(startBulkVerification(row.jobId));
           setIsDrawerOpen(true);
         }
         break;

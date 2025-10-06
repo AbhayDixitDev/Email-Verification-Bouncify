@@ -220,22 +220,7 @@ export function CreditTable() {
 
   return (
     <Card>
-      <CardHeader
-        title={
-          <Box display="inline-block">
-            {/* <Tooltip
-              arrow
-              placement="top"
-              disableInteractive
-              title="View all the email verification logs here."
-            > */}
-              <Typography variant="h6">Email Verification Logs</Typography>
-            {/* </Tooltip> */}
-          </Box>
-        }
-        sx={{ pb: 3 }}
-        subheader="View all email verification activities, including type, date, summary, and credit usage. Use filters or search to find specific logs."
-      />
+      
       <Divider />
 
       <CreditTableToolbar filters={filters} onResetPage={table.onResetPage} />

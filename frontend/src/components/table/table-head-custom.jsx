@@ -77,16 +77,17 @@ export function TableHeadCustom({
               <span>
                 {onSort ? (
                   <TableSortLabel
-                    hideSortIcon
-                    active={orderBy === headCell.id}
-                    direction={orderBy === headCell.id ? order : 'asc'}
-                    onClick={() => onSort(headCell.id)}
+                    // hideSortIcon
+                    // active={orderBy === headCell.id}
+                    // direction={orderBy === headCell.id ? order : 'asc'}
+                    // onClick={() => onSort(headCell.id)}
                   >
                     {headCell.label}
 
                     {orderBy === headCell.id ? (
                       <Box sx={{ ...visuallyHidden }}>
-                        {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                        {/* {order === 'desc' ? 'sorted descending' : 'sorted ascending'} */}
+                        ""
                       </Box>
                     ) : null}
                   </TableSortLabel>
