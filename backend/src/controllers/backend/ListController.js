@@ -169,6 +169,7 @@ module.exports = {
     download: async (req, res) => {
         // Check if list id is provided
         const downloadType = req.query.type;
+        console.log(downloadType)
         if (!req.params.jobId) {
             res.status(400).send(Response.error("List id is required", {}));
             return;
@@ -180,17 +181,10 @@ module.exports = {
                 url: `${process.env.BOUNCIFY_API_URL}/download?jobId=${req.params.jobId}&apikey=${process.env.BOUNCIFY_API_KEY}`,
                 responseType: "stream",
                 body:
-                    !downloadType || downloadType === "all"
-                        ? {
-                            filterResult: [
-                                "deliverable",
-                                "undeliverable",
-                                "accept_all",
-                                "unknown",
-                            ],
-                        }
-                        : { filterResult: [downloadType] },
+                     { filterResult: [downloadType] },
             });
+
+            console.log(response)
             // Check if response was successful
             if (response.data.success === false) {
                 res

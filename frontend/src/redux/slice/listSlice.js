@@ -78,12 +78,15 @@ export const fetchListById = createAsyncThunk('list/getList', async (listId) => 
 
 export const downloadList = createAsyncThunk(
   'list/downloadList',
-  async ({ jobId, downloadType = "all" }, { rejectWithValue }) => {
+  async ({ jobId, downloadType }, { rejectWithValue }) => {
     try {
+      console.log(jobId,downloadType)
       // Make a GET request to download the file
+      console.log(`${endpoints.list.download}/${jobId}?type=${downloadType}`)
       const response = await axiosInstance.get(`${endpoints.list.download}/${jobId}?type=${downloadType}`, {
         responseType: 'blob', // Important for handling file data
       });
+      console.log(response)
       const url = window.URL.createObjectURL(response.data);
       const link = document.createElement('a');
       link.href = url;

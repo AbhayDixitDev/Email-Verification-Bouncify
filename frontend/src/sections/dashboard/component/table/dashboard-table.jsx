@@ -320,8 +320,11 @@ export function DashboardTable() {
     setSelectedRow(null);
   };
 
-  const handleConfirmDelete = () => {
-    confirmDelete.onTrue();
+  const handleConfirmDelete = (jobId) => {
+    confirmDelete.onTrue(
+      dispatch(deleteList({ jobId: jobId })).unwrap()
+    );
+    
     handleClosePopover();
   };
 
@@ -522,7 +525,7 @@ export function DashboardTable() {
               </Tooltip>
               <Divider style={{ borderStyle: 'dashed' }} />
               <Tooltip title="Delete email list." arrow placement="left">
-                <MenuItem onClick={handleConfirmDelete} sx={{ color: 'error.main' }}>
+                <MenuItem onClick={() => handleConfirmDelete(selectedRow.jobId)} sx={{ color: 'error.main' }}>
                   <Iconify icon="solar:trash-bin-trash-bold" />
                   Delete
                 </MenuItem>

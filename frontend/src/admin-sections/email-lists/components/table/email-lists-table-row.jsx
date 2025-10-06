@@ -407,8 +407,8 @@ export function EmailListTableRow({
         <DashboardChart
           showAlert={showAlert}
           // handleAlertClose={handleAlertClose}
+          jobId={row.jobId}
           title={row.emailListName}
-          onDownload={handleDownload}
 
           chart={{
             series: [

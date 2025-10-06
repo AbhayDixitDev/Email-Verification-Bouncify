@@ -6,6 +6,7 @@ import Divider from '@mui/material/Divider';
 import { useTheme } from '@mui/material/styles';
 import CardHeader from '@mui/material/CardHeader';
 import { Box, Alert, Dialog, Button, Tooltip, Typography, DialogTitle } from '@mui/material';
+import { useDispatch } from 'react-redux';
 
 import { fNumber } from 'src/utils/format-number';
 
@@ -17,12 +18,13 @@ import ProgessLinear from 'src/components/progress-bar/progessLinear';
 import LearnMoreLink from 'src/components/learn-more-link/learn-more-link';
 
 import ChartAlert from './chart-alert';
+import { downloadList } from 'src/redux/slice/listSlice';
 
-export function DashboardChart({ title, subheader, showAlert, chart, handleAlertClose, details, onDownload, forceShowChart, ...other }) {
+export function DashboardChart({ title, subheader,jobId, showAlert, chart, handleAlertClose, details, onDownload, forceShowChart, ...other }) {
   const { isUploading, isUploaded, isStartVerification, isVerificationCompleted, progress } =
     useSelector((state) => state.fileUpload);
   const theme = useTheme();
-
+  const dispatch = useDispatch();
   const [hasShownUploadAlert, setHasShownUploadAlert] = useState(false);
   const [hasShownVerificationAlert, setHasShownVerificationAlert] = useState(false);
   const [dialog, setDialog] = useState({
@@ -33,7 +35,7 @@ export function DashboardChart({ title, subheader, showAlert, chart, handleAlert
 
   const downloadActions = [
     {
-      id: 'all-results',
+      id: 'accept_all',
       itemName: 'All Emails Result ',
       itemIcon: 'material-symbols:check-circle',
     },
@@ -93,9 +95,10 @@ export function DashboardChart({ title, subheader, showAlert, chart, handleAlert
   });
 
   // Dialog handlers
-  const handleOpen = (mode) => {
+  const handleOpen = (mode, jobId) => {
     setDialog({ open: true, mode });
-    setSelectedOption('all-results'); // Reset selection when opening dialog
+    setSelectedOption(mode); // Reset selection when opening dialog
+    
   };
 
   const handleClose = () => {
@@ -104,6 +107,7 @@ export function DashboardChart({ title, subheader, showAlert, chart, handleAlert
 
   const handleOptionSelect = (optionId) => {
     setSelectedOption(optionId);
+    console.log(selectedOption)
   };
 
   // const handleDownload = () => {
@@ -111,52 +115,16 @@ export function DashboardChart({ title, subheader, showAlert, chart, handleAlert
   //   handleClose();
   // };
 
-  const handleDownload = () => {
-    if (!onDownload) {
+  const handleDownload = async() => {
+    if (!jobId) {
       console.error('Download handler not provided');
       return;
     }
   
     // Call the parent's onDownload handler with the selected option
-    onDownload(selectedOption)
-      .then((response) => {
-        if (!response) {
-          throw new Error('No response received from server');
-        }
-  
-        // Create a blob from the response
-        const blob = new Blob([response.data], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        
-        // Create a temporary anchor element
-        const a = document.createElement('a');
-        a.href = url;
-        
-        // Set the download filename based on the selected option
-        const filename = `email_verification_${selectedOption}_${new Date().toISOString().split('T')[0]}.csv`;
-        a.download = filename;
-        
-        // Trigger the download
-        document.body.appendChild(a);
-        a.click();
-        
-        // Cleanup
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
-        // Close the dialog
-        handleClose();
-      })
-      .catch((error) => {
-        console.error('Download failed:', error);
-        // Show error message to user
-        showAlert(
-          'error',
-          'Download Failed',
-          'Failed to download the report. Please try again later.',
-          'Error'
-        );
-      });
+    console.log(jobId);
+    const res=await dispatch(downloadList({jobId,downloadType:selectedOption}));
+    console.log(res);
   };
 
   // Alert effects
@@ -245,13 +213,13 @@ export function DashboardChart({ title, subheader, showAlert, chart, handleAlert
               }
             />
             {/* Only show download button when not uploading or processing or for trash items */}
-            {(!isUploading && !isStartVerification && isVerificationCompleted) || forceShowChart ? (
+            {(jobId) || forceShowChart ? (
               <Tooltip arrow placement="top" disableInteractive title="Click to download report.">
                 <Button
                   sx={{ mt: { xs: '10px', sm: '0px' } }}
                   variant="outlined"
                   color="primary"
-                  onClick={() => handleOpen('download')}
+                  onClick={() => handleOpen('download', jobId)}
                   startIcon={<Iconify width={24} icon="solar:download-minimalistic-bold" />}
                 >
                   Download
@@ -423,7 +391,7 @@ export function DashboardChart({ title, subheader, showAlert, chart, handleAlert
                     placement="top"
                     disableInteractive
                   >
-                    <Button variant="contained" onClick={handleDownload} color="primary">
+                    <Button variant="contained" onClick={(e) => handleDownload()} color="primary">
                       Download CSV
                     </Button>
                   </Tooltip>

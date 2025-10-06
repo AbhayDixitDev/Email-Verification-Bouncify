@@ -40,6 +40,7 @@ export function DashboardTableRow({
   onStartVerification,
   isProcessing,
   isCompleted,
+  
 }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [alertState, setAlertState] = useState(null);
@@ -353,6 +354,7 @@ export function DashboardTableRow({
           showAlert={showAlert}
           handleAlertClose={handleAlertClose}
           title={currentFile.name}
+          jobId={row.jobId}
           chart={{
             series: [
               { label: 'Deliverable Emails', value: row.report?.deliverable || 0 },
