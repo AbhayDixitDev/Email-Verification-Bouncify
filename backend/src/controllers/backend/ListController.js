@@ -12,11 +12,11 @@ require('dotenv').config();
 
 
 const Status = {
-    "uploading": "UNPROCESSED",      // System is getting ready, corresponds to 'UNPROCESSED' in DB
-    "Unverified": "UNPROCESSED",        // List is ready for verification, corresponds to 'PROCESSING' in DB
-    "processing": "PROCESSING",    // Verification is underway, corresponds to 'PROCESSING' in DB
-    "verified": "COMPLETED",     // Verification finished, corresponds to 'COMPLETED' in DB
-    "failed": "FAILED"            // Verification failed, corresponds to 'FAILED' (if supported)
+    "uploading": "UNPROCESSED",      
+    "Unverified": "UNPROCESSED",        
+    "processing": "PROCESSING",    
+    "verified": "COMPLETED",     
+    "failed": "FAILED"            
 }
 
 module.exports = {
@@ -29,7 +29,7 @@ module.exports = {
     getAllList: async (req, res) => {
         const userId = req?.user?.id;
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10; // Changed default limit to 10 to match frontend
+        const limit = parseInt(req.query.limit) || 10; 
         const search = req.query.search || "";
         const status = Status[req.query.status] || "";
         const skip = (page - 1) * limit;
