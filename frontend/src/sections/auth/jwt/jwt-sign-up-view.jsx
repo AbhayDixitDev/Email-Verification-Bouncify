@@ -2,7 +2,6 @@ import { z as zod } from 'zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTheme } from '@emotion/react';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import ReCAPTCHA from 'react-google-recaptcha';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -24,25 +23,17 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { Iconify } from 'src/components/iconify';
 import { Form, Field } from 'src/components/hook-form';
 
-// import { signUp } from 'src/auth/context/jwt';
+import { signUp } from 'src/auth/context/jwt';
 import { useAuthContext } from 'src/auth/hooks';
-
-
 
 // ----------------------------------------------------------------------
 
-
-// const intialValue = {
-//   user:false,
-//   isVerified:false,
-
-// }
-
 const defaultValues = {
-  firstName: 'Hello',
-  lastName: 'Friend',
-  email: 'hello@Pabbly.com',
-  password: '@demo1',
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
 };
 
 export const SignUpSchema = zod.object({
@@ -56,9 +47,16 @@ export const SignUpSchema = zod.object({
     .string()
     .min(1, { message: 'Password is required!' })
     .min(6, { message: 'Password must be at least 6 characters!' }),
+  confirmPassword: zod
+    .string()
+    .min(1, { message: 'Please confirm your password!' }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 // ----------------------------------------------------------------------
+
 const GoogleIcon = () => (
   <SvgIcon viewBox="0 0 48 48">
     <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
@@ -71,62 +69,19 @@ const GoogleIcon = () => (
 
 export function JwtSignUpView() {
   const { checkUserSession } = useAuthContext();
-
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const handleOpenSnackbar = () => {
-    setOpenSnackbar(true);
-  };
-
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
-  };
-
+  
   const theme = useTheme();
   const router = useRouter();
 
   const password = useBoolean();
   const confirmpassword = useBoolean();
+  
   const [captchaValue, setCaptchaValue] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
-
- const [user,setUser] = useState(defaultValues);
-  const [resendEmail,setResendEmail] = useState(true);
-
-
-
-
-  // Local Database
-
-  const threeCondition=[
-    {
-      firstName: 'Hello',
-      lastName: 'Friend',
-      email: 'hello@Pabbly.com',
-      password: '@demo1',
-      isVerified:false,
-      isExist:false,
-
-    },
-    {
-      firstName: 'pabbly',
-      lastName: 'Friend',
-      email: 'pabbly@Pabbly.com',
-      password: '@demo1',
-      isVerified:true,
-      isExist:true,
-    },
-    {
-      firstName: 'magnetbrains',
-      lastName: 'Friend',
-      email: 'magnetbrains@Pabbly.com',
-      password: '@demo1',
-      isVerified:false,
-      isExist:true
-    },
-  
-
-  ] 
-
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarType, setSnackbarType] = useState('success'); // 'success' | 'error' | 'resend'
+  const [userEmail, setUserEmail] = useState('');
+  const [resendEmail, setResendEmail] = useState(true);
 
   const methods = useForm({
     resolver: zodResolver(SignUpSchema),
@@ -138,80 +93,83 @@ export function JwtSignUpView() {
     formState: { isSubmitting },
   } = methods;
 
-  const onSubmit = handleSubmit(async (data) => {
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
 
+  const onResendEmail = () => {
+    setResendEmail(false);
+    setTimeout(() => { setResendEmail(true) }, 5000);
+  };
+
+  const onCaptchaChange = (value) => {
+    setCaptchaValue(value);
+    setErrorMsg(''); // Clear error when captcha is completed
+  };
+
+  const onSubmit = handleSubmit(async (data) => {
     if (!captchaValue) {
       setErrorMsg("Please complete the CAPTCHA");
       return;
     }
 
+    try {
+      // Call the actual signup API
+      await signUp({
+        email: data.email,
+        password: data.password,
+        first_name: data.firstName,
+        last_name: data.lastName,
+      });
 
-    threeCondition.forEach((val)=>{
+      // Store user email for display in snackbar
+      setUserEmail(data.email);
+      
+      // Show success snackbar
+      setSnackbarType('success');
+      setOpenSnackbar(true);
+      setErrorMsg('');
 
-      if(data.email===val.email){
-        setUser(val);
+      // Optional: Check user session after signup
+      // await checkUserSession?.();
+
+      // Optional: Redirect to confirmation page after delay
+      // setTimeout(() => {
+      //   router.push(paths.auth.jwt.confirm);
+      // }, 2000);
+
+    } catch (error) {
+      console.error('Error during sign up:', error);
+      
+      // Handle different error types
+      if (error.response?.data?.message) {
+        const errorMessage = error.response.data.message.toLowerCase();
+        
+        if (errorMessage.includes('already') || errorMessage.includes('exist')) {
+          setSnackbarType('error');
+          setErrorMsg('Your email is already registered. Please log in to your Pabbly account.');
+        } else if (errorMessage.includes('verify') || errorMessage.includes('verification')) {
+          setSnackbarType('resend');
+          setUserEmail(data.email);
+        } else {
+          setErrorMsg(error.response.data.message);
+        }
+      } else {
+        setErrorMsg(error instanceof Error ? error.message : 'An error occurred during sign up');
       }
-
-    })
-
-   
-  
-    handleOpenSnackbar();
-
-    console.log("hello");
-
-
-    // setTimeout(()=>{setUserAlreadyExist(false)},5000)
-    
-    // setTimeout(()=>{
-    //   router.push(`${paths.auth.jwt.confirm}`)
-    // },2000)
-    
-    // router.push(`${paths.auth.jwt.confirm}`)
-
-    // try {
-    //   await signUp({
-    //     email: data.email,
-    //     password: data.password,
-    //     firstName: data.firstName,
-    //     lastName: data.lastName,
-    //   });
-    //   await checkUserSession?.();
-
-
-
-    //   // router.refresh();
-     
-    // } catch (error) {
-    //   console.error(error);
-    //   setErrorMsg(error instanceof Error ? error.message : error);
-    // }
+      
+      setOpenSnackbar(true);
+    }
   });
 
-  const onResendEmail = ()=>{
-
-      setResendEmail(false);
-
-      setTimeout(()=>{setResendEmail(true)},5000)
-    
-  }
-  const onCaptchaChange = (value) => {
-    setCaptchaValue(value);
-  };
-
   const renderHead = (
-    <Stack spacing={0} mb={1} textAlign="">
+    <Stack spacing={0} mb={1}>
       <Typography variant="h5">Create Pabbly Account</Typography>
-      {/* <Stack direction="row" spacing={0}> */}
-        <Typography variant="body2" sx={{ color: 'text.secondary',mb:2 }}>
+      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
         Sign up in seconds. No credit card required.
-        </Typography>
-
-        {/* <Link component={RouterLink} href={paths.auth.jwt.signIn} variant="subtitle2">
-          Sign In
-        </Link> */}
-      {/* </Stack> */}
-      <Stack direction="row" sx={{mb:1}} >
+      </Typography>
+      
+      <Stack direction="row" sx={{ mb: 1 }}>
         <Button
           fullWidth
           variant="outlined"
@@ -240,14 +198,12 @@ export function JwtSignUpView() {
         <Field.Text name="lastName" label="Last Name" />
       </Stack>
 
-      <Field.Text name="email" label="Email Address"  />
+      <Field.Text name="email" label="Email Address" />
 
       <Field.Text
         name="password"
         label="Password"
-        // placeholder="Enter Password"
         type={password.value ? 'text' : 'password'}
-       
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
@@ -262,10 +218,8 @@ export function JwtSignUpView() {
       <Field.Text
         name="confirmPassword"
         label="Confirm Password"
-        // placeholder="Confirm Password"
         type={confirmpassword.value ? 'text' : 'password'}
         helperText="Use 8 or more characters for password."
-      
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
@@ -278,14 +232,11 @@ export function JwtSignUpView() {
       />
 
       {/* reCAPTCHA */}
-      <Box sx={{ width:"100%",display: "flex", justifyContent: "start" , transform:'scale(0.88)',transformOrigin:'0 0' }}>
+      <Box sx={{ width: "100%", display: "flex", justifyContent: "start", transform: 'scale(0.88)', transformOrigin: '0 0' }}>
         <ReCAPTCHA
           sitekey="6LdNrKgUAAAAALsQ3getachCJBWULQBj4q17_mgv"
           data-theme="light"
           onChange={onCaptchaChange}
-    
-          
-        
         />
       </Box>
 
@@ -296,200 +247,148 @@ export function JwtSignUpView() {
         type="submit"
         variant="contained"
         loading={isSubmitting}
-        // onClick={handleOpenSnackbar}
-        // href={paths.auth.jwt.confirm}
-        loadingIndicator="Create account..."
+        loadingIndicator="Creating account..."
       >
         Create Account
       </LoadingButton>
-{
 
-}
+      {/* Success Snackbar */}
+      {snackbarType === 'success' && (
+        <Snackbar
+          open={openSnackbar}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          sx={{ mt: 6 }}
+        >
+          {resendEmail ? (
+            <Alert
+              onClose={handleCloseSnackbar}
+              severity="success"
+              sx={{
+                width: { xs: '100%', sm: '60%', md: '42%' },
+                fontSize: '14px',
+                fontWeight: 'bold',
+                backgroundColor: theme.palette.background.paper,
+                boxShadow: '0px 8px 16px 0px rgba(145, 158, 171, 0.16)',
+                color: theme.palette.text.primary,
+                textAlign: "left"
+              }}
+            >
+              <Typography variant="body2">
+                We have sent a verification email to <b>{userEmail}.</b> Please check your inbox and verify your email address.{' '}
+                <Link component={RouterLink} onClick={onResendEmail}>Resend Email</Link>
+              </Typography>
+            </Alert>
+          ) : (
+            <Alert
+              onClose={handleCloseSnackbar}
+              severity="success"
+              sx={{
+                width: { xs: '100%', sm: '60%', md: '42%' },
+                fontSize: '14px',
+                fontWeight: 'bold',
+                backgroundColor: theme.palette.background.paper,
+                boxShadow: '0px 8px 16px 0px rgba(145, 158, 171, 0.16)',
+                color: theme.palette.text.primary,
+                textAlign: "left"
+              }}
+            >
+              <Typography variant="body2">
+                <b>Email Sent!</b> We've re-sent the email! Please allow a few moments, and don't forget to check your spam or junk folder if it's missing.
+              </Typography>
+            </Alert>
+          )}
+        </Snackbar>
+      )}
 
-{
-  user.isExist ?
-  <Box> 
-    {
-      !user.isVerified?
-      <Snackbar     
-      open={openSnackbar}
-      // autoHideDuration={}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        sx={{mt:6}}>
-
-          {resendEmail? <Alert severity='error'  
+      {/* Error Snackbar - Email Already Exists */}
+      {snackbarType === 'error' && (
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={3000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          sx={{ mt: 6 }}
+        >
+          <Alert
+            severity='error'
             onClose={handleCloseSnackbar}
-        sx={{
-          
-          width: {xs:'100%',sm:'60%',md:'42%'},
-          fontSize: '14px',
-          fontWeight: 'bold',
-          backgroundColor: theme.palette.background.paper,
-          boxShadow: '0px 8px 16px 0px rgba(145, 158, 171, 0.16)',
-          color: theme.palette.text.primary,
-          textAlign:"left"
-        }}> 
-    
-        
-        
-      <Typography variant='body2'>
-             Your email is registered but not verified. We’ve just sent a new verification email. Please check your inbox and verify your email to proceed. 
-             <Link component={RouterLink} onClick = {onResendEmail} > Resend Email</Link>
-          </Typography>
+            sx={{
+              width: { xs: '100%', sm: '60%', md: '66%' },
+              fontSize: '14px',
+              fontWeight: 'bold',
+              backgroundColor: theme.palette.background.paper,
+              boxShadow: '0px 8px 16px 0px rgba(145, 158, 171, 0.16)',
+              color: theme.palette.text.primary,
+              textAlign: "left"
+            }}
+          >
+            <Typography variant='body2'>
+              {errorMsg || 'Your email is already registered. Please log in to your Pabbly account.'}
+            </Typography>
+          </Alert>
+        </Snackbar>
+      )}
 
-       
-    
-        </Alert>:
-         <Alert
-         onClose={handleCloseSnackbar}
-         severity="success"
-         sx={{
-           
-           width: {xs:'100%',sm:'60%',md:'42%'},
-           fontSize: '14px',
-           fontWeight: 'bold',
-           backgroundColor: theme.palette.background.paper,
-           boxShadow: '0px 8px 16px 0px rgba(145, 158, 171, 0.16)',
-           color: theme.palette.text.primary,
-           textAlign:"left"
-         }}
-       >        
-      {/* {`If you didn’t receive the original email, we've sent it again to your inbox. Please check your spam or junk folder if it doesn’t appear shortly.`}
-     
-     
-     <Link sx={{color:"green"}}> Email Sent</Link> */}
-     
-     <Typography variant="body2">
-     <b>Email Sent !</b>
-      {
-       // ` If you didn’t receive the original email, we've sent it again to your inbox. Please check your spam or junk folder if it doesn’t appear shortly.`
-      ` We’ve re-sent the email! Please allow a few moments, and don’t forget to check your spam or junk folder if it’s missing`
-      } 
-         </Typography> 
-     
-       </Alert>
-
-
-
-          }
-       
-      </Snackbar>:
-         <Snackbar     
-         open={openSnackbar}
-         autoHideDuration={3000}
-           onClose={handleCloseSnackbar}
-           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-           sx={{mt:6}}>
-           <Alert severity='error'  
-               onClose={handleCloseSnackbar}
-           sx={{
-             
-             width: {xs:'100%',sm:'60%',md:'66%'},
-             fontSize: '14px',
-             fontWeight: 'bold',
-             backgroundColor: theme.palette.background.paper,
-             boxShadow: '0px 8px 16px 0px rgba(145, 158, 171, 0.16)',
-             color: theme.palette.text.primary,
-             textAlign:"left"
-           }}> 
-       
-          
+      {/* Resend Email Snackbar - Unverified Account */}
+      {snackbarType === 'resend' && (
+        <Snackbar
+          open={openSnackbar}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          sx={{ mt: 6 }}
+        >
+          {resendEmail ? (
+            <Alert
+              severity='error'
+              onClose={handleCloseSnackbar}
+              sx={{
+                width: { xs: '100%', sm: '60%', md: '42%' },
+                fontSize: '14px',
+                fontWeight: 'bold',
+                backgroundColor: theme.palette.background.paper,
+                boxShadow: '0px 8px 16px 0px rgba(145, 158, 171, 0.16)',
+                color: theme.palette.text.primary,
+                textAlign: "left"
+              }}
+            >
               <Typography variant='body2'>
-              Your email is already registered. Please log in to your Pabbly account. 
-              {/* <Link component={RouterLink} onClick = {onResendEmail} > Login</Link> */}
-           </Typography>
-           
-             
-           </Alert>
-         </Snackbar>
+                Your email is registered but not verified. We've just sent a new verification email. Please check your inbox and verify your email to proceed.{' '}
+                <Link component={RouterLink} onClick={onResendEmail}>Resend Email</Link>
+              </Typography>
+            </Alert>
+          ) : (
+            <Alert
+              onClose={handleCloseSnackbar}
+              severity="success"
+              sx={{
+                width: { xs: '100%', sm: '60%', md: '42%' },
+                fontSize: '14px',
+                fontWeight: 'bold',
+                backgroundColor: theme.palette.background.paper,
+                boxShadow: '0px 8px 16px 0px rgba(145, 158, 171, 0.16)',
+                color: theme.palette.text.primary,
+                textAlign: "left"
+              }}
+            >
+              <Typography variant="body2">
+                <b>Email Sent!</b> We've re-sent the email! Please allow a few moments, and don't forget to check your spam or junk folder if it's missing.
+              </Typography>
+            </Alert>
+          )}
+        </Snackbar>
+      )}
 
-    }
- 
-  
-  </Box>
-  :
-  <Snackbar
-  open={openSnackbar}
-  // autoHideDuration={}
-  onClose={handleCloseSnackbar}
-  anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-  sx={{mt:6}}
->
-
-  {
-    resendEmail? <Alert
-    onClose={handleCloseSnackbar}
-    severity="success"
-    sx={{
-      
-      width: {xs:'100%',sm:'60%',md:'42%'},
-      fontSize: '14px',
-      fontWeight: 'bold',
-      backgroundColor: theme.palette.background.paper,
-      boxShadow: '0px 8px 16px 0px rgba(145, 158, 171, 0.16)',
-      color: theme.palette.text.primary,
-       textAlign:"left"
-    }}
-  >      
-  <Typography variant="body2">
-  We have sent a verification email to <b>numeral-whale-32@inboxkitten.com. </b>
-  Please check your inbox and verify your email address.   <Link component={RouterLink} onClick = {onResendEmail} > Resend Email</Link>
-    </Typography> 
-
-
-  </Alert>:
-  <Alert
-    onClose={handleCloseSnackbar}
-    severity="success"
-    sx={{
-      
-      width: {xs:'100%',sm:'60%',md:'42%'},
-      fontSize: '14px',
-      fontWeight: 'bold',
-      backgroundColor: theme.palette.background.paper,
-      boxShadow: '0px 8px 16px 0px rgba(145, 158, 171, 0.16)',
-      color: theme.palette.text.primary,
-       textAlign:"left"
-    }}
-  >        
- {/* {`If you didn’t receive the original email, we've sent it again to your inbox. Please check your spam or junk folder if it doesn’t appear shortly.`}
-
-
-<Link sx={{color:"green"}}> Email Sent</Link> */}
-
-<Typography variant="body2">
-<b>Email Sent !</b>
- {
-  // ` If you didn’t receive the original email, we've sent it again to your inbox. Please check your spam or junk folder if it doesn’t appear shortly.`
- ` We’ve re-sent the email! Please allow a few moments, and don’t forget to check your spam or junk folder if it’s missing`
- } 
-    </Typography> 
-
-  </Alert>
-  }
- 
-</Snackbar>
-
-}
-    
-
-     
-      <Stack
-        direction="row"
-        spacing={0.5}
-        justifyContent="center" // Centers content horizontally
-        alignItems="center" // Centers content vertically
-      >
+      <Stack direction="row" spacing={0.5} justifyContent="center" alignItems="center">
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-        Already have a Pabbly Account? 
+          Already have a Pabbly Account?
         </Typography>
         <Link
           component={RouterLink}
           href={paths.auth.jwt.signIn}
           variant="subtitle2"
           color="primary"
-          sx={{ alignSelf: 'center' }} // Aligns this item to the center
+          sx={{ alignSelf: 'center' }}
         >
           Login
         </Link>
@@ -506,43 +405,34 @@ export function JwtSignUpView() {
         color: 'text.secondary',
       }}
     >
-      <Divider sx={{mt:1, mb:1}}/>
+      <Divider sx={{ mt: 1, mb: 1 }} />
       {'By signing up, I agree to '}
-     
-      <Link color="primary" href="https://www.pabbly.com/terms-conditions/" target="_blank"
-        rel="noopener noreferrer">
-      {`Pabbly's Terms of Service`} 
+      <Link color="primary" href="https://www.pabbly.com/terms-conditions/" target="_blank" rel="noopener noreferrer">
+        {`Pabbly's Terms of Service`}
       </Link>
       {' and '}
-      <Link color="primary">
-      Privacy Policy
+      <Link color="primary" href="https://www.pabbly.com/privacy-policy/" target="_blank" rel="noopener noreferrer">
+        Privacy Policy
       </Link>
       .
     </Typography>
   );
 
   return (
-  
-<Card sx={{p:4,textAlign:"center"}}>
-{renderHead}
+    <Card sx={{ p: 4, textAlign: "center" }}>
+      {renderHead}
 
-{!!errorMsg && (
-  <Alert severity="error" sx={{ mb: 3 }}>
-    {errorMsg}
-  </Alert>
-)}
+      {!!errorMsg && !openSnackbar && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {errorMsg}
+        </Alert>
+      )}
 
-<Form methods={methods} onSubmit={onSubmit}>
-  {renderForm}
-</Form>
+      <Form methods={methods} onSubmit={onSubmit}>
+        {renderForm}
+      </Form>
 
-{renderTerms}
-
-
-</Card>
-
-   
-         
-
+      {renderTerms}
+    </Card>
   );
 }
