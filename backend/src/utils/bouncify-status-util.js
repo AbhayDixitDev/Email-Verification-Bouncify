@@ -1,9 +1,10 @@
 const BouncifyStatus = {
-    "preparing": "UNPROCESSED",      // System is getting ready, corresponds to 'UNPROCESSED' in DB
-    "ready": "UNPROCESSED",        // List is ready for verification, corresponds to 'PROCESSING' in DB
-    "verifying": "PROCESSING",    // Verification is underway, corresponds to 'PROCESSING' in DB
-    "completed": "COMPLETED",     // Verification finished, corresponds to 'COMPLETED' in DB
-    "failed": "FAILED"            // Verification failed, corresponds to 'FAILED' (if supported)
+    "preparing": "UNPROCESSED",      // Preparing the job, not started yet
+    "ready": "PROCESSING",            // Ready to start or just started processing
+    "verifying": "PROCESSING",        // Verification in progress
+    "completed": "COMPLETED",         // Verification finished successfully
+    "failed": "FAILED"                // Verification failed
 };
+
 
 module.exports = BouncifyStatus

@@ -10,9 +10,10 @@ import {
   CardHeader,
   Typography,
   CardContent,
+  CircularProgress,
 } from '@mui/material';
 
-const VerifySingleEmail = ({ onVerify, email, setEmail, onClose }) => {
+const VerifySingleEmail = ({ onVerify, email, setEmail, onClose, loading }) => {
   const [error, setError] = useState('');
 
   const validateEmail = (validemail) => {
@@ -105,9 +106,14 @@ const VerifySingleEmail = ({ onVerify, email, setEmail, onClose }) => {
             gap: 1,
           }}
         >
-          <Button variant="contained" onClick={handleVerify} color="primary">
-            Verify
-          </Button>
+          <Button 
+          variant="contained"
+          onClick={handleVerify}
+          color="primary"
+          disabled={loading} // Disable when loading
+        >
+          {loading ? <CircularProgress color="inherit" size={24} /> : 'Verify'}
+        </Button>
           <Button variant="outlined" color="inherit" onClick={onClose}>
             Cancel
           </Button>

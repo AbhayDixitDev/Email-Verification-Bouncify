@@ -134,6 +134,7 @@ export function CreditTable() {
   const tableData = React.useMemo(() => {
     try {
       console.log('Mapping history data:', history);
+      console.log('Mapping history data:', history?.data);
       const data = history?.data || [];
       return mapApiDataToTable(data);
     } catch (error) {
@@ -183,14 +184,16 @@ export function CreditTable() {
     filters: filters.state,
   });
 
-  const dataInPage = rowInPage(dataFiltered, table.page, table.rowsPerPage);
+  // Since we're using server-side pagination, we don't need to slice the data here
+  // The API is already returning the correct page of data
+  const dataInPage = dataFiltered;
 
   const canReset =
     !!filters.state.name ||
     filters.state.status !== 'all' ||
     (!!filters.state.startDate && !!filters.state.endDate);
 
-  const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
+  const notFound = (!dataInPage.length && canReset) || !dataInPage.length;
 
   const handleFilterStatus = useCallback(
     (event, newValue) => {
@@ -254,12 +257,7 @@ export function CreditTable() {
             />
 
             <TableBody>
-              {dataInPage
-                .slice(
-                  table.page * table.rowsPerPage,
-                  table.page * table.rowsPerPage + table.rowsPerPage
-                )
-                .map((row, index) => (
+              {dataInPage.map((row, index) => (
                   <CreditTableRow
                     key={index}
                     row={row}
@@ -269,7 +267,7 @@ export function CreditTable() {
 
               <TableEmptyRows
                 height={table.dense ? 56 : 56 + 20}
-                emptyRows={emptyRows(table.page, table.rowsPerPage, tableData.length)}
+                emptyRows={emptyRows(0, table.rowsPerPage, dataInPage.length)}
               />
               {tableData.length === 0 ? (
                 <TableNoData
@@ -290,14 +288,27 @@ export function CreditTable() {
       </Box>
 
       <TablePaginationCustom
-        page={table.page}
+        page={history?.page ? history.page - 1 : 0} // Convert to 0-based index for MUI
         count={history?.total || 0}
-        rowsPerPage={table.rowsPerPage}
-        onPageChange={table.onChangePage}
+        rowsPerPage={history?.limit || 10}
+        onPageChange={(event, newPage) => {
+          // Convert to 1-based page number for the API
+          const nextPage = newPage + 1;
+          dispatch(fetchCreditsHistory({ 
+            page: nextPage, 
+            limit: history?.limit || 10 
+          }));
+          table.onChangePage(event, newPage);
+        }}
         onChangeDense={table.onChangeDense}
         onRowsPerPageChange={(event) => {
+          const newRowsPerPage = parseInt(event.target.value, 10);
+          dispatch(fetchCreditsHistory({ 
+            page: 1, // Reset to first page
+            limit: newRowsPerPage
+          }));
           table.onChangeRowsPerPage(event);
-          table.onChangePage(null, 0); // Reset to first page when changing rows per page
+          table.onChangePage(null, 0);
         }}
         rowsPerPageOptions={[5, 10, 25, 50]}
       />

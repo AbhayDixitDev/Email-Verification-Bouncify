@@ -57,6 +57,7 @@ app.use(express.urlencoded({ extended: true }));
  */
 app.use(setupMongoSession());
 
+
 /**
  * Use the mysql session middleware
  */

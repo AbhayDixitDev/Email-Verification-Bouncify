@@ -32,6 +32,7 @@ import { DashboardTable } from 'src/sections/dashboard/component/table/dashboard
 import CreditStatsCards from 'src/sections/dashboard/component/stats-cards/credit-stats-cards';
 import VerifySingleEmail from 'src/sections/dashboard/component/verify-single-email/verify-single-email';
 import { DashboardTrashTable } from 'src/sections/dashboard/component/dashboard-trash-table/dashboard-trash-table';
+import { pollJobStatus } from 'src/redux/slice/listSlice';
 
 
 
@@ -41,6 +42,13 @@ const { items, style } = listItems;
 
 export default function Page() {
   const dispatch = useDispatch();
+useEffect(() => {
+  const activeJobId = localStorage.getItem('activeJobId');
+  if (activeJobId) {
+    dispatch(pollJobStatus({ jobId: activeJobId }));
+  }
+}, [dispatch]);
+
   const [anchorEl, setAnchorEl] = useState(null);
   const [email, setEmail] = useState('');
   const [activeTable, setActiveTable] = useState('dashboard');
@@ -71,42 +79,49 @@ export default function Page() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const handleVerify = () => {
-    axios
-      .post(`${endpoints.list.verifySingle}`, { email })
-      .then((res) => {
-        dispatch(deductCredit({ amount: 1 }));
-        if (res.data.data.result === 'deliverable') {
-          setAlertState({
-            open: true,
-            severity: 'success',
-            status: 'Accept All',
-            message: `The email "${email}" is valid!`,
-            title: 'Verification Result',
-          });
-        } else {
-          setAlertState({
-            open: true,
-            severity: 'error',
-            status: 'Undeliverable',
-            message: `${res.data.data.result}`,
-            title: 'Verification Result',
-          });
-        }
-      })
-      .catch((err) => {
-        setAlertState({
-          open: true,
-          severity: 'error',
-          status: '',
-          message: `${err.message}`,
-          title: '',
-        });
-      })
-      .finally(() => {
-        setEmail('');
+  // In Page.js
+const [loading, setLoading] = useState(false);
+
+const handleVerify = () => {
+  setLoading(true); // Show loading spinner
+  axios
+    .post(`${endpoints.list.verifySingle}`, { email })
+    .then((res) => {
+      dispatch(deductCredit({ amount: 1 }));
+      setAlertState({
+        open: true,
+        severity: res.data.data.result === 'deliverable' ? 'success' : 'error',
+        status: res.data.data.result === 'deliverable' ? 'Accept All' : 'Undeliverable',
+        message: res.data.data.result === 'deliverable'
+          ? `The email "${email}" is valid!`
+          : `${res.data.data.result}`,
+        title: 'Verification Result',
       });
-  };
+      setTimeout(() => {
+        handleDialogClose('singleEmail');
+
+        setLoading(false); // Stop loading
+        window.location.reload();
+      }, 1500); // Wait 1.5s before closing
+    })
+    .catch((err) => {
+      setAlertState({
+        open: true,
+        severity: 'error',
+        status: '',
+        message: `${err.message}`,
+        title: '',
+      });
+      setTimeout(() => {
+        handleDialogClose('singleEmail');
+        setLoading(false); // Stop loading
+      }, 1500);
+    })
+    .finally(() => {
+      setEmail('');
+    });
+};
+
 
   useEffect(() => {
     if (!totalCredits) {
@@ -296,15 +311,13 @@ export default function Page() {
         }}
       >
         <DialogContent sx={{ p: 0 }}>
-          <VerifySingleEmail
-            onVerify={() => {
-              handleVerify();
-              handleDialogClose('singleEmail');
-            }}
-            email={email}
-            setEmail={setEmail}
-            onClose={() => handleDialogClose('singleEmail')}
-          />
+        <VerifySingleEmail
+  onVerify={handleVerify}
+  email={email}
+  setEmail={setEmail}
+  onClose={() => handleDialogClose('singleEmail')}
+  loading={loading}
+/>
         </DialogContent>
       </Dialog>
 

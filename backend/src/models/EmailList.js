@@ -49,7 +49,16 @@ const EmailListSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
+    },
+    stale: {
+        type: Boolean,
+        default: false  
+      }
+      
 });
 
 module.exports = mongoose.model('EmailList', EmailListSchema);

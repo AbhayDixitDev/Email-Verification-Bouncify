@@ -388,31 +388,30 @@ module.exports = {
     getStatus: async (req, res) => {
         try {
             const { jobId } = req.query;
-            // Check For Valid Job Id
             const existingJob = await EmailList.findOne({ jobId: jobId });
             if (!existingJob) {
                 Logs.error(`jobId not found in database: ${jobId}`);
                 return res.status(404).json(Response.error("File Not Found"));
             }
-
-            const response = await getBulkStatus(jobId)
+    
+            const response = await getBulkStatus(jobId);
             if (!response || !response.status) {
-                return res.status(404).json(Response.error("Status not found "));
+                Logs.error(`Status not found for jobId: ${jobId}`);
+                return res.status(404).json(Response.error("Status not found"));
             }
-
-            // Deduct credits After verification Completed
-            const requiredCredits = response?.verified
-            if (response.status === "completed") {
+    
+            const updatedStatus = BouncifyStatus[response.status.toLowerCase()] || "UNPROCESSED";
+    
+            // Deduct credits only when COMPLETED (avoid duplication)
+            if (updatedStatus === "COMPLETED" && existingJob.status !== "COMPLETED") {
                 await CreditService.deductCredits(
                     req.user.id,
-                    requiredCredits,
+                    response?.verified || 0,
                     `Used In Verifying "${existingJob?.listName}" List`,
                     "VERIFIED_LIST"
                 );
             }
-
-            const updatedStatus = BouncifyStatus[response.status];
-
+    
             const updatedReport = {
                 report: {
                     status: response?.status,
@@ -432,28 +431,37 @@ module.exports = {
                         accept_all: response?.results?.accept_all || 0,
                         unknown: response?.results?.unknown || 0
                     }
-                },
+                }
             };
-            // Update the status in the database
-            const updatedEmailList = await EmailList.findOneAndUpdate(
-                { jobId },
-                {
-                    $set: {
-                        status: updatedStatus,
-                        ...updatedReport
-                    }
-                },
-                { new: true }
-            );
-            if (!updatedEmailList) {
-                return res.status(404).json(Response.error("Failed to update document"));
+    
+            // Update the status and report in DB only if there is a change
+            if (updatedStatus !== existingJob.status) {
+                const updatedEmailList = await EmailList.findOneAndUpdate(
+                    { jobId },
+                    {
+                        $set: {
+                            status: updatedStatus,
+                            ...updatedReport
+                        }
+                    },
+                    { new: true }
+                );
+    
+                if (!updatedEmailList) {
+                    Logs.error(`Failed to update document for jobId: ${jobId}`);
+                    return res.status(404).json(Response.error("Failed to update document"));
+                }
+                return res.status(200).json(Response.success("Data Fetched Successfully", updatedEmailList));
+            } else {
+                // If no status change, return existing document info
+                return res.status(200).json(Response.success("Data Fetched Successfully", existingJob));
             }
-            return res.status(200).json(Response.success("Data Fetched Successfully", updatedEmailList))
         } catch (error) {
             Logs.error("Error In Fetching List Status: ", error);
             return res.status(500).json(Response.error('Internal Server Error'));
         }
     },
+    
 
     /**
      * Delete The  Bulk Email List

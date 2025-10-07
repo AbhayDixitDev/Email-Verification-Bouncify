@@ -87,17 +87,18 @@ const creditController = {
             return res.status(500).json(Response.error('Internal Server Error'));
         }
     },
-
     /**
-    * Get The List Credit history
-    * @param {*} req 
-    * @param {*} res 
-    */
+     * Get The List Credit history
+     * @param {Object} req - Express request object
+     * @param {Object} res - Express response object
+     * @returns {Promise<void>}
+     */
     creditHistory: async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const search = req.query.search || "";
         const frontendStatus = req.query.status || "";
+        const timezone = req.headers['timezone'] || 'UTC'; // Get timezone from headers or default to UTC
         const skip = (page - 1) * limit;
 
         const getSchemaStatus = (frontendStatus) => {
@@ -108,9 +109,11 @@ const creditController = {
             };
             return statusMap[frontendStatus] || '';
         };
+        
         const status = frontendStatus === 'all' ? '' : getSchemaStatus(frontendStatus);
+        
         try {
-            const creditDetails = await CreditService.getCreditDetails(req.user.id, {
+            let creditDetails = await CreditService.getCreditDetails(req.user.id, {
                 page,
                 limit,
                 skip,
@@ -118,12 +121,22 @@ const creditController = {
                 status,
             });
 
-            if (creditDetails.data.length > 0) {
-                res.status(200).json(
+            // Convert dates to user's timezone
+            if (creditDetails.data && creditDetails.data.length > 0) {
+                creditDetails.data = creditDetails.data.map(credit => ({
+                    ...credit,
+                    createdAt: new Date(credit.createdAt).toLocaleString('en-US', { timeZone: timezone }),
+                    // If there's an updatedAt field, convert it as well
+                    ...(credit.updatedAt && { 
+                        updatedAt: new Date(credit.updatedAt).toLocaleString('en-US', { timeZone: timezone }) 
+                    })
+                }));
+                
+                return res.status(200).json(
                     Response.success("Credit history successfully fetched", creditDetails)
                 );
             } else {
-                res.status(200).json(
+                return res.status(200).json(
                     Response.success("No credit history found", {
                         data: [],
                         totalCredits: 0,
@@ -134,11 +147,9 @@ const creditController = {
             }
         } catch (error) {
             Logs.error("Error fetching credit history:", error);
-            res
-                .status(500)
-                .json(
-                    Response.error("There is some error while getting credit history", {})
-                );
+            return res.status(500).json(
+                Response.error("There is some error while getting credit history", { error: error.message })
+            );
         }
     },
 
