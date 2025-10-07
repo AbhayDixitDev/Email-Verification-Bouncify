@@ -377,7 +377,7 @@ export default function ActivityLogView() {
                                                 } </Typography>
                                             </TableCell>
                                             <TableCell>
-                                                <Chip label={
+                                                <Chip sx={{textTransform: 'uppercase'}} label={
                                                         log.event_source
                                                     }
                                                     color={

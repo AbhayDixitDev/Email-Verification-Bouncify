@@ -16,7 +16,7 @@ import {
   Backdrop as MuiBackdrop,
 } from '@mui/material';
 
-import { startVerification } from 'src/redux/slice/upload-slice';
+import { startVerification } from 'src/redux/slice/uploadSlice';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';

@@ -4,7 +4,7 @@ import React, { useRef, useState, forwardRef, useImperativeHandle } from 'react'
 import { Box, Tooltip, IconButton, Typography } from '@mui/material';
 
 import { varAlpha } from 'src/theme/styles';
-import { startUpload, finishUpload, updateProgress } from 'src/redux/slice/upload-slice';
+import { startUpload, finishUpload, updateProgress } from 'src/redux/slice/uploadSlice';
 
 import { Iconify } from '../iconify';
 

@@ -37,17 +37,35 @@ import { pollJobStatus } from 'src/redux/slice/listSlice';
 
 
 
+
 const metadata = { title: 'Dashboard | Pabbly Email Verification' };
 const { items, style } = listItems;
 
 export default function Page() {
   const dispatch = useDispatch();
+  const list = useSelector((state) => state.list);
 useEffect(() => {
   const activeJobId = localStorage.getItem('activeJobId');
   if (activeJobId) {
     dispatch(pollJobStatus({ jobId: activeJobId }));
   }
 }, [dispatch]);
+
+useEffect(() => {
+  const handleBeforeUnload = (event) => {
+    if (list.loading) {
+      event.preventDefault();
+      event.returnValue = ''; // Standard for most browsers
+      return ''; // For some older browsers
+    }
+  };
+
+  window.addEventListener('beforeunload', handleBeforeUnload);
+
+  return () => {
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+  };
+}, [list.loading]);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [email, setEmail] = useState('');
@@ -348,12 +366,12 @@ const handleVerify = () => {
               justifyContent: 'flex-end',
             }}
           >
-            <Button variant="contained" color="primary" onClick={() => handleDialogClose('bulkEmail')}>
+            {/* <Button variant="contained" color="primary" onClick={() => handleDialogClose('bulkEmail')}>
               Upload
-            </Button>
-            <Button onClick={() => handleDialogClose('bulkEmail')} variant="outlined">
+            </Button> */}
+            {/* <Button onClick={() => handleDialogClose('bulkEmail')} variant="outlined">
               Cancel
-            </Button>
+            </Button> */}
           </Box>
         </DialogActions>
       </Dialog>

@@ -2,7 +2,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import listNameReducer from './slice/listNameSlice';
-import fileUploadReducer from './slice/upload-slice';
+import fileUploadReducer from './slice/uploadSlice';
 import userReducer from "./slice/userSlice"
 import listReducer from './slice/listSlice'
 import creditReducer from './slice/creditSlice'

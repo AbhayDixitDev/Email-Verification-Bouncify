@@ -2,7 +2,7 @@ import { useDispatch } from 'react-redux';
 
 import { Box, Alert, Button, Typography } from '@mui/material';
 
-import { startVerification } from 'src/redux/slice/upload-slice';
+import { startVerification } from 'src/redux/slice/uploadSlice';
 
 export default function ChartAlert() {
   const dispatch = useDispatch();

@@ -6,7 +6,7 @@ import { Box, Typography } from '@mui/material';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 
 import { varAlpha } from 'src/theme/styles';
-import { updateProgress, completeVerification } from 'src/redux/slice/upload-slice';
+import { updateProgress, completeVerification } from 'src/redux/slice/uploadSlice';
 
 // Import the necessary actions
 
