@@ -239,7 +239,7 @@ module.exports = {
             }
 
             // Check User Has Enough Credit Or NOt
-            console.log(req?.session?.passport?.user);
+            // console.log(req?.session?.passport?.user);
             const hasCredits = await CreditService.hasEnoughCredits(req?.session?.passport?.user.id, 1);
             if (!hasCredits) {
                 return res.status(400).json(Response.error("Insufficient credits"));
@@ -247,7 +247,8 @@ module.exports = {
 
             // Call The Service To Validate A Single Email
             const result = await verifySingleEmail(email);
-            console.log(result);
+            // const result = false
+            // console.log(result);
             // Deduct credits After verification Completed and store the entry
             if (result) {
                 await CreditService.deductCredits(

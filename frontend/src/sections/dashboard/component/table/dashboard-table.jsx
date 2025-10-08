@@ -517,12 +517,12 @@ export function DashboardTable() {
         <MenuList>
           {selectedRow && selectedRow.status !== 'processing' && (
             <>
-              <Tooltip title="Move to folder" arrow placement="left">
+              {/* <Tooltip title="Move to folder" arrow placement="left">
                 <MenuItem onClick={handleMoveToFolder}>
                   <Iconify icon="fluent:folder-move-16-filled" />
                   Move to folder
                 </MenuItem>
-              </Tooltip>
+              </Tooltip> */}
               <Divider style={{ borderStyle: 'dashed' }} />
               <Tooltip title="Delete email list." arrow placement="left">
                 <MenuItem onClick={() => handleConfirmDelete(selectedRow.jobId)} sx={{ color: 'error.main' }}>

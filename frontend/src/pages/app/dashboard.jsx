@@ -22,6 +22,7 @@ import DialogContent from '@mui/material/DialogContent';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import BigCard from 'src/components/app-big-card/big-card';
 import PageHeader from 'src/components/page-header/page-header';
+import { fetchLists } from 'src/redux/slice/listSlice';
 
 import { listItems } from 'src/_mock/app-big-card/_dashboardBigCardListItems';
 import { deductCredit, fetchCreditBalance } from 'src/redux/slice/creditSlice';
@@ -31,8 +32,7 @@ import { DashboardTable } from 'src/sections/dashboard/component/table/dashboard
 // import { FolderSection } from 'src/sections/dashboard/component/folder/dashboardfolder';
 import CreditStatsCards from 'src/sections/dashboard/component/stats-cards/credit-stats-cards';
 import VerifySingleEmail from 'src/sections/dashboard/component/verify-single-email/verify-single-email';
-import { DashboardTrashTable } from 'src/sections/dashboard/component/dashboard-trash-table/dashboard-trash-table';
-import { pollJobStatus } from 'src/redux/slice/listSlice';
+import { toast } from 'sonner';
 
 
 
@@ -43,29 +43,9 @@ const { items, style } = listItems;
 
 export default function Page() {
   const dispatch = useDispatch();
-  const list = useSelector((state) => state.list);
-useEffect(() => {
-  const activeJobId = localStorage.getItem('activeJobId');
-  if (activeJobId) {
-    dispatch(pollJobStatus({ jobId: activeJobId }));
-  }
-}, [dispatch]);
 
-useEffect(() => {
-  const handleBeforeUnload = (event) => {
-    if (list.loading) {
-      event.preventDefault();
-      event.returnValue = ''; // Standard for most browsers
-      return ''; // For some older browsers
-    }
-  };
 
-  window.addEventListener('beforeunload', handleBeforeUnload);
 
-  return () => {
-    window.removeEventListener('beforeunload', handleBeforeUnload);
-  };
-}, [list.loading]);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [email, setEmail] = useState('');
@@ -81,6 +61,10 @@ useEffect(() => {
     message: '',
     status: '',
   });
+
+  useEffect(()=>{
+    console.log(activeTable)
+  },[activeTable])
 
   const handlePopoverOpen = (event) => setAnchorEl(event.currentTarget);
   const handlePopoverClose = () => setAnchorEl(null);
@@ -101,42 +85,39 @@ useEffect(() => {
 const [loading, setLoading] = useState(false);
 
 const handleVerify = () => {
-  setLoading(true); // Show loading spinner
+  const toastId = toast.loading('Verifying email...');
+  setLoading(true);
+  
   axios
     .post(`${endpoints.list.verifySingle}`, { email })
     .then((res) => {
       dispatch(deductCredit({ amount: 1 }));
-      setAlertState({
-        open: true,
-        severity: res.data.data.result === 'deliverable' ? 'success' : 'error',
-        status: res.data.data.result === 'deliverable' ? 'Accept All' : 'Undeliverable',
-        message: res.data.data.result === 'deliverable'
-          ? `The email "${email}" is valid!`
-          : `${res.data.data.result}`,
-        title: 'Verification Result',
-      });
-      setTimeout(() => {
-        handleDialogClose('singleEmail');
-
-        setLoading(false); // Stop loading
-        window.location.reload();
-      }, 1500); // Wait 1.5s before closing
+      const isDeliverable = res.data.data.result === 'deliverable';
+      
+      toast[isDeliverable ? 'success' : 'error'](
+        isDeliverable 
+          ? `The email "${email}" is valid!` 
+          : res.data.data.result,
+        { 
+          id: toastId,
+          description: isDeliverable ? 'This email address is valid and can receive emails.' : 'This email address may not be valid.'
+        }
+      );
+      
+      // Refresh the lists without reloading the page
+      dispatch(fetchLists());
     })
     .catch((err) => {
-      setAlertState({
-        open: true,
-        severity: 'error',
-        status: '',
-        message: `${err.message}`,
-        title: '',
+
+      toast.error(err.message || 'Failed to verify email', { 
+        id: toastId 
       });
-      setTimeout(() => {
-        handleDialogClose('singleEmail');
-        setLoading(false); // Stop loading
-      }, 1500);
+       dispatch(fetchLists());
     })
     .finally(() => {
+      setLoading(false);
       setEmail('');
+      handleDialogClose('singleEmail');
     });
 };
 
@@ -178,10 +159,13 @@ const handleVerify = () => {
   };
 
   const handleDialogClose = (type) => {
+
     setDialogState((prev) => ({
       ...prev,
       [type]: false,
     }));
+
+    dispatch(fetchLists());
   };
 
   return (
