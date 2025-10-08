@@ -166,7 +166,7 @@ export default function DownloadReportDialog({
   const handleSubmit = () => {
     if (validateForm()) {
       // Here you would typically make an API call to save/update the plan
-      console.log('Submitting form:', formData);
+      // console.log('Submitting form:', formData);
 
       // Call the success callback with appropriate message
       onClose();

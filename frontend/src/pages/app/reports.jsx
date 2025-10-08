@@ -78,7 +78,7 @@ export default function Page() {
   };
 
   const handleDownload = () => {
-    console.log(`Downloading ${selectedOption}`);
+    // console.log(`Downloading ${selectedOption}`);
     handleClose();
   };
 
@@ -317,7 +317,7 @@ export default function Page() {
                 </Button>
                 <Button
                   onClick={() => {
-                    console.log('Item Deleted');
+                    // console.log('Item Deleted');
                     handleClose();
                   }}
                   color="error"

@@ -56,7 +56,7 @@ export default function UpdateCreditsDialog({ open, onClose, rowData }) {
   };
 
   const handleDownload = () => {
-    console.log('Downloading option:', selectedOption);
+    // console.log('Downloading option:', selectedOption);
 
     setSnackbarState({
       open: true,

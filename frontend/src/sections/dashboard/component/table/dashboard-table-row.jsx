@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
+import { useState, useEffect } from 'react';
 
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -17,16 +18,20 @@ import {
   Backdrop as MuiBackdrop,
 } from '@mui/material';
 
+// eslint-disable-next-line import/no-unresolved
 import { startVerification } from 'src/redux/slice/uploadSlice';
+// eslint-disable-next-line import/no-unresolved
+import { fetchLists, pollJobStatus, startBulkVerification  } from 'src/redux/slice/listSlice';
 
+// eslint-disable-next-line import/no-unresolved
 import { Label } from 'src/components/label';
+// eslint-disable-next-line import/no-unresolved
 import { Iconify } from 'src/components/iconify';
+// eslint-disable-next-line import/no-unresolved
 import { usePopover } from 'src/components/custom-popover';
 
+// eslint-disable-next-line import/no-unresolved
 import { DashboardChart } from '../chart/dashboard-chart';
-import { startBulkVerification, pollJobStatus, fetchLists } from 'src/redux/slice/listSlice';
-
-import { toast } from 'sonner';
 
 // Custom backdrop for transparent background
 const CustomBackdrop = (props) => (
@@ -58,11 +63,11 @@ export function DashboardTableRow({
   const dispatch = useDispatch();
 
   const showAlert = (type, title, message) => {
-    console.log(`Alert Type: ${type}, Title: ${title}, Message: ${message}`);
+    // console.log(`Alert Type: ${type}, Title: ${title}, Message: ${message}`);
   };
 
   const handleAlertClose = () => {
-    console.log('Alert closed');
+    // console.log('Alert closed');
   };
 
   const handleStartVerification = () => {
@@ -89,7 +94,7 @@ export function DashboardTableRow({
             }
           }
           break;
-        case 'processing':
+        case 'processing':{
           const processingToastId = toast.loading('Checking status...');
           try {
             await dispatch(pollJobStatus({ jobId: row.jobId })).unwrap();
@@ -100,14 +105,18 @@ export function DashboardTableRow({
             toast.error(error?.message || 'Email list verification is in progress', { id: processingToastId });
           }
           break;
-        case 'Verified':
+        }
+        case 'Verified':{
           setIsDrawerOpen(true);
           break;
-        case 'uploading':
+        }
+        case 'uploading':{
           setIsDrawerOpen(true);
           break;
-        default:
+        }
+        default:{
           break;
+        }
       }
     } catch (error) {
       console.error('Error in handleAction:', error);
@@ -148,7 +157,7 @@ export function DashboardTableRow({
   };
 
   useEffect(()=>{
-    console.log(row)
+    // console.log(row)
   },[row])
 
   const renderPrimary = (

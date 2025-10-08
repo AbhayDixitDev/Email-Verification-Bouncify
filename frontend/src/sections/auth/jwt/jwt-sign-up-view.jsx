@@ -14,16 +14,24 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { Box, Card, Button, Divider, SvgIcon, Snackbar } from '@mui/material';
 
+// eslint-disable-next-line import/no-unresolved
 import { paths } from 'src/routes/paths';
+// eslint-disable-next-line import/no-unresolved
 import { useRouter } from 'src/routes/hooks';
+// eslint-disable-next-line import/no-unresolved
 import { RouterLink } from 'src/routes/components';
 
+// eslint-disable-next-line import/no-unresolved
 import { useBoolean } from 'src/hooks/use-boolean';
 
+// eslint-disable-next-line import/no-unresolved
 import { Iconify } from 'src/components/iconify';
+// eslint-disable-next-line import/no-unresolved
 import { Form, Field } from 'src/components/hook-form';
 
+// eslint-disable-next-line import/no-unresolved
 import { signUp } from 'src/auth/context/jwt';
+// eslint-disable-next-line import/no-unresolved
 import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
@@ -294,7 +302,7 @@ export function JwtSignUpView() {
               }}
             >
               <Typography variant="body2">
-                <b>Email Sent!</b> We&apos;ve re-sent the email! Please allow a few moments, and don't forget to check your spam or junk folder if it's missing.
+                <b>Email Sent!</b> We&apos;ve re-sent the email! Please allow a few moments, and don&apos;t forget to check your spam or junk folder if it&apos;s missing.
               </Typography>
             </Alert>
           )}
@@ -353,7 +361,7 @@ export function JwtSignUpView() {
               }}
             >
               <Typography variant='body2'>
-                Your email is registered but not verified. We've just sent a new verification email. Please check your inbox and verify your email to proceed.{' '}
+                Your email is registered but not verified. We&apos;ve just sent a new verification email. Please check your inbox and verify your email to proceed.{' '}
                 <Link component={RouterLink} onClick={onResendEmail}>Resend Email</Link>
               </Typography>
             </Alert>
@@ -372,7 +380,7 @@ export function JwtSignUpView() {
               }}
             >
               <Typography variant="body2">
-                <b>Email Sent!</b> We've re-sent the email! Please allow a few moments, and don't forget to check your spam or junk folder if it's missing.
+                <b>Email Sent!</b> We&apos;ve re-sent the email! Please allow a few moments, and don&apos;t forget to check your spam or junk folder if it&apos;s missing.
               </Typography>
             </Alert>
           )}

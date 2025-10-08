@@ -1,5 +1,4 @@
 import { toast } from 'sonner';
-import moment from 'moment-timezone';
 import { Helmet } from 'react-helmet-async';
 import { useRef, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -23,10 +22,15 @@ import {
   CircularProgress,
 } from '@mui/material';
 
+// eslint-disable-next-line import/no-unresolved
 import { CONFIG } from 'src/config-global';
+// eslint-disable-next-line import/no-unresolved
+import { saveTimeZone, fetchTimeZones,  fetchUserTimeZone, setSelectedTimeZone } from 'src/redux/slice/timeZoneSlice';
 
+// eslint-disable-next-line import/no-unresolved
 import { Iconify } from 'src/components/iconify';
-import { fetchTimeZones, fetchUserTimeZone, saveTimeZone, setSelectedTimeZone } from 'src/redux/slice/timeZoneSlice';
+
+
 
 // ----------------------------------------------------------------------
 

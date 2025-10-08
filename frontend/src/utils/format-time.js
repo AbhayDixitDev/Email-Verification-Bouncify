@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
+import duration from 'dayjs/plugin/duration';
+import timezone from 'dayjs/plugin/timezone';
+import relativeTime from 'dayjs/plugin/relativeTime';
 
 // ----------------------------------------------------------------------
 
@@ -224,7 +224,7 @@ export function fAdd({
  * @param {string} format - The format string
  * @returns {string} Formatted date string
  */
-export function fDateTimeInTimezone(date, timezone, format) {
+export function fDateTimeInTimezone(date, timezones, format) {
   if (!date) {
     return null;
   }
@@ -234,7 +234,7 @@ export function fDateTimeInTimezone(date, timezone, format) {
     return 'Invalid time value';
   }
 
-  return dayjs(date).tz(timezone).format(format ?? formatStr.dateTime);
+  return dayjs(date).tz(timezones).format(format ?? formatStr.dateTime);
 }
 
 
@@ -283,7 +283,7 @@ export function fSub({
  * @param {string} format - The format string
  * @returns {string} Formatted date string
  */
-export function fDateInTimezone(date, timezone, format) {
+export function fDateInTimezone(date, timezones, format) {
   if (!date) {
     return null;
   }
@@ -293,7 +293,7 @@ export function fDateInTimezone(date, timezone, format) {
     return 'Invalid time value';
   }
 
-  return dayjs(date).tz(timezone).format(format ?? formatStr.date);
+  return dayjs(date).tz(timezones).format(format ?? formatStr.date);
 }
 
 /**
@@ -303,7 +303,7 @@ export function fDateInTimezone(date, timezone, format) {
  * @param {string} format - The format string
  * @returns {string} Formatted time string
  */
-export function fTimeInTimezone(date, timezone, format) {
+export function fTimeInTimezone(date, timezones, format) {
   if (!date) {
     return null;
   }
@@ -313,7 +313,7 @@ export function fTimeInTimezone(date, timezone, format) {
     return 'Invalid time value';
   }
 
-  return dayjs(date).tz(timezone).format(format ?? formatStr.time);
+  return dayjs(date).tz(timezones).format(format ?? formatStr.time);
 }
 
 /**
@@ -322,6 +322,6 @@ export function fTimeInTimezone(date, timezone, format) {
  * @param {string} format - The format string
  * @returns {string} Current time in timezone
  */
-export function nowInTimezone(timezone, format) {
-  return dayjs().tz(timezone).format(format ?? formatStr.dateTime);
+export function nowInTimezone(timezones, format) {
+  return dayjs().tz(timezones).format(format ?? formatStr.dateTime);
 }

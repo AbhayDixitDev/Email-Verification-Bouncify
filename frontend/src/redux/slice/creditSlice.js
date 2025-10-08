@@ -73,7 +73,7 @@ const creditSlice = createSlice({
             .addCase(fetchCreditsHistory.fulfilled, (state, action) => {
                 state.loading = false;
                 // Handle the API response structure
-                console.log('action.payload', action.payload);
+                // console.log('action.payload', action.payload);
                 const { data, totalCredits, page, creditsPerPage } = action.payload;
                 state.history = {
                     data: Array.isArray(data) ? data : [],
@@ -81,10 +81,10 @@ const creditSlice = createSlice({
                     page: page || 1,
                     limit: creditsPerPage || 10
                 };
-                console.log('History data set:', state.history);
+                // console.log('History data set:', state.history);
                 // Also update the total credits
                 state.totalCredits = totalCredits || 0;
-                console.log('Total credits set:', state.totalCredits);
+                // console.log('Total credits set:', state.totalCredits);
             })
             .addCase(fetchCreditsHistory.rejected, (state, action) => {
                 state.status = false;

@@ -158,7 +158,7 @@ export function JwtSignUpView() {
   
     handleOpenSnackbar();
 
-    console.log("hello");
+    // console.log("hello");
 
 
   });

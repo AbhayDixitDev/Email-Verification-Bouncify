@@ -1,9 +1,7 @@
 import { toast } from 'sonner';
-import { useDispatch, useSelector } from 'react-redux';
-import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '@emotion/react';
-
-import { fDateTimeInTimezone } from 'src/utils/format-time';
+import { useDispatch, useSelector } from 'react-redux';
+import { useMemo, useState, useEffect, useCallback,  } from 'react';
 
 import {
   Tab,
@@ -25,31 +23,41 @@ import {
   DialogActions,
 } from '@mui/material';
 
+// eslint-disable-next-line import/no-unresolved
 import { useBoolean } from 'src/hooks/use-boolean';
+// eslint-disable-next-line import/no-unresolved
 import { useSetState } from 'src/hooks/use-set-state';
-import { TablePagination } from '@mui/material';
 
+// eslint-disable-next-line import/no-unresolved
+import { fDateTimeInTimezone } from 'src/utils/format-time';
+
+// eslint-disable-next-line import/no-unresolved
 import { varAlpha } from 'src/theme/styles';
+// eslint-disable-next-line import/no-unresolved
+import { fetchLists, deleteList } from 'src/redux/slice/listSlice';
+// eslint-disable-next-line import/no-unresolved
 import { DASHBOARD_STATUS_OPTIONS } from 'src/_mock/_table/_apptable/_dashboard';
 
+// eslint-disable-next-line import/no-unresolved
 import { Label } from 'src/components/label';
+// eslint-disable-next-line import/no-unresolved
 import { Iconify } from 'src/components/iconify';
+// eslint-disable-next-line import/no-unresolved
 import { Scrollbar } from 'src/components/scrollbar';
+// eslint-disable-next-line import/no-unresolved
 import { CustomPopover } from 'src/components/custom-popover';
+// eslint-disable-next-line import/no-unresolved
 import { ConfirmDialog } from 'src/components/confirm-dialog';
 import {
   useTable,
-  rowInPage,
-  emptyRows,
   TableNoData,
-  getComparator,
-  TableEmptyRows,
   TableHeadCustom,
   TablePaginationCustom,
+// eslint-disable-next-line import/no-unresolved
 } from 'src/components/table';
 
+// eslint-disable-next-line import/no-unresolved
 import { MoveToFolderPopover } from 'src/sections/dialog-boxes/move-to-folder-dailog';
-import { fetchLists, deleteList } from 'src/redux/slice/listSlice';
 
 import { DashboardTableRow } from './dashboard-table-row';
 import { DashboardTableToolbar } from './dashboard-table-toolbar';
@@ -166,14 +174,15 @@ export function DashboardTable() {
     if (status === 'PROCESSING') return 'processing';
     if (status === 'UNPROCESSED') return 'Unverified';
     if (status === 'FAILED') return 'Failed';
+    return '';
   };
 
-  const statusUiMap = {
+  const statusUiMap = useMemo(() => ({
     COMPLETED: "Verified",
     PROCESSING: "processing",
     UNPROCESSED: "Unverified",
     FAILED: "Failed"
-  };
+  }), []);
   
 
   const uiToBackendStatus = (ui) => {
@@ -185,11 +194,11 @@ export function DashboardTable() {
   };
 
   // Helper function to format date with timezone
-  const formatDateWithTimezone = (date) => {
+  const formatDateWithTimezone = useCallback((date) => {
     if (!date) return '';
     const timezone = selectedTimeZone?.key || 'UTC';
     return fDateTimeInTimezone(date, timezone, 'MMM DD, YYYY HH:mm:ss');
-  };
+  }, [selectedTimeZone]);
 
   const [tableData, setTableData] = useState(() => (listState?.data?.listData || []).map((item, index) => ({
     id: item._id || index,
@@ -217,7 +226,7 @@ export function DashboardTable() {
   });
 
   useEffect(() => {
-    console.log(tableData);
+    // console.log(tableData);
   },[tableData])
 
   const { stats } = listState.data;
@@ -254,17 +263,17 @@ const totalCount = listState.data.pagination?.total || 0;
         report: item.report || {},
       }))
     );
-  }, [listState?.data?.listData]);
+  }, [listState?.data?.listData, formatDateWithTimezone, statusUiMap]);
   
 
   // Fetch lists from backend when filters or pagination change
   useEffect(() => {
-    console.log('Fetching lists with params:', {
-      page: table.page + 1,
-      limit: table.rowsPerPage,
-      search: filters.state.name,
-      status: filters.state.status === 'all' ? '' : filters.state.status
-    });
+    // console.log('Fetching lists with params:', {
+    //   page: table.page + 1,
+    //   limit: table.rowsPerPage,
+    //   search: filters.state.name,
+    //   status: filters.state.status === 'all' ? '' : filters.state.status
+    // });
     const params = {
       page: table.page + 1,  // MUI Table is 0-indexed, API is 1-indexed
       limit: table.rowsPerPage,
@@ -326,7 +335,7 @@ const totalCount = listState.data.pagination?.total || 0;
         })
       );
     },
-    [dispatch, filters, table.rowsPerPage, filters.state.name]
+    [dispatch, filters, table]
   );
   
 
@@ -344,7 +353,7 @@ const totalCount = listState.data.pagination?.total || 0;
 
   const handleConfirmDelete = (jobId) => {
     confirmDelete.onTrue(
-      dispatch(deleteList({ jobId: jobId })).unwrap()
+      dispatch(deleteList({ jobId })).unwrap()
     );
     
     handleClosePopover();
@@ -385,13 +394,13 @@ const totalCount = listState.data.pagination?.total || 0;
       );
 
   useEffect(() => {
-    console.log('Table state:', {
-      page: table.page,
-      rowsPerPage: table.rowsPerPage,
-      total: listState.data.pagination.total,
-      paginationData: listState.data.pagination,
-      listState: listState
-    });
+    // console.log('Table state:', {
+    //   page: table.page,
+    //   rowsPerPage: table.rowsPerPage,
+    //   total: listState.data.pagination.total,
+    //   paginationData: listState.data.pagination,
+    //   listState
+    // });
   }, [table, listState]);
 
   const canReset =
@@ -535,7 +544,7 @@ const totalCount = listState.data.pagination?.total || 0;
                 <TableNoData
                   title="No Data Found"
                   description="No data found in the table"
-                  notFound={true}
+                  notFound={dataFiltered.length === 0}
                 />
               )}
             </TableBody>

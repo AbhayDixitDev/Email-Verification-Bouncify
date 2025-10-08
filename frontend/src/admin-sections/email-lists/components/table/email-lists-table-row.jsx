@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
@@ -16,12 +16,17 @@ import {
   Typography,
 } from '@mui/material';
 
+// eslint-disable-next-line import/no-unresolved
 import { useBoolean } from 'src/hooks/use-boolean';
 
+// eslint-disable-next-line import/no-unresolved
 import { downloadList } from 'src/redux/slice/listSlice';
 
+// eslint-disable-next-line import/no-unresolved
 import { Label } from 'src/components/label'; 
+// eslint-disable-next-line import/no-unresolved
 import { Iconify } from 'src/components/iconify';
+// eslint-disable-next-line import/no-unresolved
 import { usePopover } from 'src/components/custom-popover';
 
 import { DashboardChart } from '../chart/dashboard-chart';
@@ -49,12 +54,10 @@ export function EmailListTableRow({
 
   // Drawer functions
   const showAlert = (type, title, message) => {
-    console.log(`Alert Type: ${type}, Title: ${title}, Message: ${message}`);
+    // console.log(`Alert Type: ${type}, Title: ${title}, Message: ${message}`);
   };
 
-  useEffect(()=>{
-console.log(row)
-  },[])
+
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 

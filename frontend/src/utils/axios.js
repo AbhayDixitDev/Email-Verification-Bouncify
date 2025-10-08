@@ -1,6 +1,7 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
+// eslint-disable-next-line import/no-unresolved
 import { CONFIG } from 'src/config-global';
 
 // ----------------------------------------------------------------------

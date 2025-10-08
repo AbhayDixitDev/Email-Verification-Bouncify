@@ -234,7 +234,7 @@ export function SmtpTable({ onEditClick, handleOpenDialog }) {
   // Handle successful submission
   const handleSubmitSuccess = (message) => {
     // Handle success (e.g., show notification, refresh data)
-    console.log(message);
+    // console.log(message);
     handleCloseDialog();
   };
 

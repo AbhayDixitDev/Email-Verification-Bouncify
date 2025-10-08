@@ -17,7 +17,7 @@ export function ResultItem({ title,folderItems, groupLabel, onClickItem, searchQ
     ? title
     : [{ text: title, subtext:folderItems, highlight: title && title.toLowerCase().includes(safeSearchQuery) }];
 
-    console.log(titleParts)
+    // console.log(titleParts)
   return (
     <ListItemButton
       onClick={onClickItem}

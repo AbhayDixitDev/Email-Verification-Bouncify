@@ -166,7 +166,7 @@ const CustomTable = ({
 
   const handleRowClick = useCallback((event, row) => {
     if (!event.target.closest('td[data-checkbox-cell="true"]') && !event.target.closest('button')) {
-      console.log('Row clicked:', row);
+      // console.log('Row clicked:', row);
     }
   }, []);
 
@@ -280,7 +280,7 @@ const CustomTable = ({
             <ReExecuteAction
               numSelected={selected.length}
               onReExecute={() => {
-                console.log('Re-executing selected items:', selected);
+                // console.log('Re-executing selected items:', selected);
               }}
             />
           )}

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
+// eslint-disable-next-line import/no-unresolved
 import axios, { endpoints } from 'src/utils/axios';
 
 import { setSelectedTimeZone } from './timeZoneSlice';

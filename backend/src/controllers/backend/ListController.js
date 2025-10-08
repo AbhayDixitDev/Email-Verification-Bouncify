@@ -482,6 +482,8 @@ module.exports = {
                 }
       
                 const updatedStatus = BouncifyStatus[response.status.toLowerCase()] || "UNPROCESSED";
+
+                
       
                 // Deduct credits only once when status changes to COMPLETED
                 if (updatedStatus === "COMPLETED" && list.status !== "COMPLETED") {
@@ -494,23 +496,51 @@ module.exports = {
                 }
       
                 const updatedReport = {
-                  status: response.status,
-                  total: response.total || 0,
-                  verified: response.verified || 0,
-                  pending: response.pending || 0,
-                  analysis: response.analysis || {},
-                  results: response.results || {},
+                    report: {
+                        status: response?.status,
+                        total: response?.total || 0,
+                        verified: response?.verified || 0,
+                        pending: response?.pending || 0,
+                        analysis: {
+                            common_isp: response?.analysis?.common_isp || 0,
+                            role_based: response?.analysis?.role_based || 0,
+                            disposable: response?.analysis?.disposable || 0,
+                            spamtrap: response?.analysis?.spamtrap || 0,
+                            syntax_error: response?.analysis?.syntax_error || 0
+                        },
+                        results: {
+                            deliverable: response?.results?.deliverable || 0,
+                            undeliverable: response?.results?.undeliverable || 0,
+                            accept_all: response?.results?.accept_all || 0,
+                            unknown: response?.results?.unknown || 0
+                        }
+                    }
                 };
+
+            
       
                 // Update DB if status has changed
+                // if (updatedStatus !== list.status) {
+                //   const updatedDoc = await EmailList.findOneAndUpdate(
+                //     { jobId: list.jobId },
+                //     { $set: { status: updatedStatus, ...updatedReport } },
+                //     { new: true }
+                //   );
+                //   return updatedDoc || list;
+                // }
                 if (updatedStatus !== list.status) {
-                  const updatedDoc = await EmailList.findOneAndUpdate(
-                    { jobId: list.jobId },
-                    { $set: { status: updatedStatus, ...updatedReport } },
-                    { new: true }
-                  );
-                  return updatedDoc || list;
-                }
+                    const updatedDoc = await EmailList.findOneAndUpdate(
+                        { jobId: list.jobId },
+                        {
+                            $set: {
+                                status: updatedStatus,
+                                ...updatedReport
+                            }
+                        },
+                        { new: true }
+                    );
+                    return updatedDoc || list;                   
+                     }
                 return list; // No change, return existing
       
               } catch (error) {

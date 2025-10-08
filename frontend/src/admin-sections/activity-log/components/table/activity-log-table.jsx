@@ -4,25 +4,31 @@ import { useState, useEffect, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
+import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import CardHeader from '@mui/material/CardHeader';
-import CircularProgress from '@mui/material/CircularProgress';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 
 // Custom hooks
+// eslint-disable-next-line import/no-unresolved
 import { useSetState } from 'src/hooks/use-set-state';
 
 // Utils
+// eslint-disable-next-line import/no-unresolved
 import axios, { endpoints } from 'src/utils/axios';
 
 // Components
+// eslint-disable-next-line import/no-unresolved
+import { ACTIVITY_LOG_STATUS_OPTIONS } from 'src/_mock/_table/_apptable/_activity_log';
+
+// eslint-disable-next-line import/no-unresolved
 import { Scrollbar } from 'src/components/scrollbar';
 
 // Mock data
-import { ACTIVITY_LOG_STATUS_OPTIONS } from 'src/_mock/_table/_apptable/_activity_log';
+
 import {
   useTable,
   rowInPage,
@@ -33,6 +39,7 @@ import {
   TableHeadCustom,
   TableSelectedAction,
   TablePaginationCustom,
+// eslint-disable-next-line import/no-unresolved
 } from 'src/components/table';
 
 import { ActivityLogTableRow } from './activity-log-table-row';

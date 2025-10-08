@@ -4,42 +4,45 @@ import {useDispatch, useSelector} from 'react-redux';
 
 import {
     Box,
+    Chip,
     Card,
+    Grid,
     Table,
     Button,
-    TableRow,
-    TableHead,
-    CardHeader,
+    Select,
+    Tooltip,
     Divider,
+    TableRow,
+    MenuItem,
     TableBody,
     TableCell,
-    Container,
+    TextField,
+    IconButton,
+    InputLabel,
     Typography,
+    FormControl,
+    InputAdornment,
     TableContainer,
     TablePagination,
-    TextField,
-    InputAdornment,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    Chip,
-    IconButton,
-    Tooltip,
-    Stack,
-    Grid,
-    Paper
 } from '@mui/material';
 
-import {CONFIG} from 'src/config-global';
+// eslint-disable-next-line import/no-unresolved
 import {fDateTimeInTimezone} from 'src/utils/format-time';
 
-import {Iconify} from 'src/components/iconify';
-import {Scrollbar} from 'src/components/scrollbar';
-import {TableEmptyRows, TableHeadCustom, TableNoData} from 'src/components/table';
-
-import {fetchActivityLogs, setFilters, setPagination, clearFilters} from 'src/redux/slice/activityLogSlice';
+// eslint-disable-next-line import/no-unresolved
+import {CONFIG} from 'src/config-global';
+// eslint-disable-next-line import/no-unresolved
 import {fetchUserTimeZone} from 'src/redux/slice/timeZoneSlice';
+// eslint-disable-next-line import/no-unresolved
+import { setFilters, clearFilters, fetchActivityLogs} from 'src/redux/slice/activityLogSlice';
+
+// eslint-disable-next-line import/no-unresolved
+import {Iconify} from 'src/components/iconify';
+// eslint-disable-next-line import/no-unresolved
+import {Scrollbar} from 'src/components/scrollbar';
+// eslint-disable-next-line import/no-unresolved
+import {TableNoData, TableEmptyRows, TableHeadCustom } from 'src/components/table';
+
 import ActivityLogDetailsModal from './activity-log-details-modal';
 
 // ----------------------------------------------------------------------
@@ -411,7 +414,7 @@ export default function ActivityLogView() {
                                         }/> {
                                     filteredLogs.length === 0 && (
                                         <TableNoData title="No activity logs found" description="No activity logs match your current filters"
-                                            notFound={true}/>
+                                            notFound={filteredLogs.length === 0 }/>
                                     )
                                 } </TableBody>
                             </Table>

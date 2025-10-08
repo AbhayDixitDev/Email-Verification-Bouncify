@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
+// eslint-disable-next-line import/no-unresolved
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
 import { deductCredit } from './creditSlice';
@@ -80,13 +81,13 @@ export const downloadList = createAsyncThunk(
   'list/downloadList',
   async ({ jobId, downloadType }, { rejectWithValue }) => {
     try {
-      console.log(jobId,downloadType)
+      // console.log(jobId,downloadType)
       // Make a GET request to download the file
-      console.log(`${endpoints.list.download}/${jobId}?type=${downloadType}`)
+      // console.log(`${endpoints.list.download}/${jobId}?type=${downloadType}`)
       const response = await axiosInstance.get(`${endpoints.list.download}/${jobId}?type=${downloadType}`, {
         responseType: 'blob', // Important for handling file data
       });
-      console.log(response)
+      // console.log(response)
       const url = window.URL.createObjectURL(response.data);
       const link = document.createElement('a');
       link.href = url;
@@ -232,11 +233,11 @@ const listSlice = createSlice({
       state.searchResults = [];
     },
     setSelectedListIndex: (state, action) => {
-      console.log(action.payload);
+      // console.log(action.payload);
       state.selectedListIndex = action.payload;
     },
     setSelectedList: (state, action) => {
-      console.log(action.payload);
+      // console.log(action.payload);
 
       state.selectedList = action.payload;
     },
@@ -247,7 +248,7 @@ const listSlice = createSlice({
       state.completedLists = action.payload;
     },
     setUnprocessedList: (state, action) => {
-      console.log(action.payload);
+      // console.log(action.payload);
       state.unprocessedLists = action.payload;
     },
     setChartValues: (state, action) => {

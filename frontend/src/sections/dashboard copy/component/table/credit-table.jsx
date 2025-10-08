@@ -1,29 +1,36 @@
 import { useTheme } from '@emotion/react';
-import { useState, useCallback, useEffect } from 'react';
+import React,{ useEffect, useCallback  } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import React from 'react';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import { Divider, CardHeader, Typography, CircularProgress } from '@mui/material';
+import { Divider, CircularProgress } from '@mui/material';
 
-import { fetchCreditsHistory } from 'src/redux/slice/creditSlice';
-
+// eslint-disable-next-line import/no-unresolved
 import { useSetState } from 'src/hooks/use-set-state';
 
+// eslint-disable-next-line import/no-unresolved
 import { fIsBetween } from 'src/utils/format-time';
 
+// eslint-disable-next-line import/no-unresolved
+import { fetchCreditsHistory } from 'src/redux/slice/creditSlice';
+
+// eslint-disable-next-line import/no-unresolved
 import { Scrollbar } from 'src/components/scrollbar';
+
+// eslint-disable-next-line import/no-unresolved
+
 import {
   useTable,
-  rowInPage,
   emptyRows,
   TableNoData,
   getComparator,
   TableEmptyRows,
   TableHeadCustom,
   TablePaginationCustom,
+// eslint-disable-next-line import/no-unresolved
 } from 'src/components/table';
 
 import { CreditTableRow } from './credit-table-row';
@@ -109,7 +116,7 @@ const mapApiDataToTable = (data = []) => {
     return {
       id: item._id || `item-${index}`,
       type: item.type === 'BULK' ? 'Bulk' : item.type === 'SINGLE' ? 'Single' : 'Credits',
-      status: item.type == 'ADDITION' ? 'ADDITION' :  'DEDUCTION',
+      status: item.type === 'ADDITION' ? 'ADDITION' :  'DEDUCTION',
       date: formattedDate,
       summary: item.description || item.summary || 'N/A',
       folder: item.folder || '--',
@@ -133,12 +140,12 @@ export function CreditTable() {
   // Map API data to table format with error handling
   const tableData = React.useMemo(() => {
     try {
-      console.log('Mapping history data:', history);
-      console.log('Mapping history data:', history?.data);
+      // console.log('Mapping history data:', history);
+      // console.log('Mapping history data:', history?.data);
       const data = history?.data || [];
       return mapApiDataToTable(data);
-    } catch (error) {
-      console.error('Error mapping table data:', error);
+    } catch (err) {
+      console.error('Error mapping table data:', err);
       return [];
     }
   }, [history]);
@@ -162,9 +169,9 @@ export function CreditTable() {
           page: table.page + 1,
           limit: table.rowsPerPage,
         };
-        console.log('Fetching with params:', params);
+        // console.log('Fetching with params:', params);
         const result =await dispatch(fetchCreditsHistory(params));
-        console.log('Fetch result:', result);
+        // console.log('Fetch result:', result);
       } catch (err) {
         console.error('Error fetching credit history:', err);
       }

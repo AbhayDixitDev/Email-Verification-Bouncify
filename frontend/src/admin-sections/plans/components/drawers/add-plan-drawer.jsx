@@ -161,7 +161,7 @@ const AddPlanDrawer = ({ open, onClose, planData, mode = 'add' }) => {
   const handleSubmit = () => {
     if (validateForm()) {
       // Here you would typically make an API call to save/update the plan
-      console.log('Submitting form:', formData);
+      // console.log('Submitting form:', formData);
       
       setSnackbar({
         open: true,

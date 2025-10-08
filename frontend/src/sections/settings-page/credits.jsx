@@ -1,9 +1,12 @@
 import { useTheme } from '@emotion/react';
 import { Helmet } from 'react-helmet-async';
-import { Box, Typography, Divider } from '@mui/material';
 
+import { Box, Divider, Typography  } from '@mui/material';
+
+// eslint-disable-next-line import/no-unresolved
 import { CONFIG } from 'src/config-global';
 
+// eslint-disable-next-line import/no-unresolved
 import  {CreditTable}  from 'src/sections/dashboard copy/component/table/credit-table';
 
 import CreditStatsCards from '../dashboard/component/stats-cards/credit-stats-cards';

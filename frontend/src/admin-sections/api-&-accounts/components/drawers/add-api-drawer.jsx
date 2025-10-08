@@ -112,7 +112,7 @@ const AddApiDrawer = ({ open, onClose, planData, mode = 'add' }) => {
   // Handle form submission
   const handleSubmit = () => {
     if (validateForm()) {
-      console.log('Submitting API account:', formData);
+      // console.log('Submitting API account:', formData);
       
       setSnackbar({
         open: true,

@@ -1,11 +1,14 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { toast } from 'sonner';
+
 import { Box, Link, TextField, Autocomplete } from '@mui/material';
 
-import axios, { endpoints } from 'src/utils/axios';
-import FileUpload from 'src/components/upload/upload';
+// eslint-disable-next-line import/no-unresolved
 import { uploadList } from 'src/redux/slice/listSlice';
+
+// eslint-disable-next-line import/no-unresolved
+import FileUpload from 'src/components/upload/upload';
 
 export default function Upload({ setAlertState, onUpload }) {
   const dispatch = useDispatch();

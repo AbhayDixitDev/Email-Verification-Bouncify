@@ -106,7 +106,7 @@ export default function AddApiDialog({
 
   const handleSubmit = () => {
     if (validateForm()) {
-      console.log('Submitting form:', formData);
+      // console.log('Submitting form:', formData);
 
       onClose();
       onSubmitSuccess(
@@ -132,7 +132,7 @@ export default function AddApiDialog({
       navigator.clipboard
         .writeText(formData.secret_key)
         .then(() => {
-          console.log('Secret key copied to clipboard!');
+          // console.log('Secret key copied to clipboard!');
         })
         .catch((error) => {
           console.error('Failed to copy secret key:', error);

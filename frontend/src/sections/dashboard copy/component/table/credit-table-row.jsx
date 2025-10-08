@@ -1,11 +1,9 @@
-import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
-import { Tooltip, Typography } from '@mui/material';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
+import { Tooltip, Typography } from '@mui/material';
 
+// eslint-disable-next-line import/no-unresolved
 import { Label } from 'src/components/label';
-import { useEffect } from 'react';
 
 // ----------------------------------------------------------------------
 
@@ -36,11 +34,11 @@ export function CreditTableRow({ row, selected }) {
     }
   };
 
-  const getCreditChange = (type, credits) => type == 'DEDUCTION' ? `-${credits}` : `+${credits}`;
+  const getCreditChange = (type, credits) => type === 'DEDUCTION' ? `-${credits}` : `+${credits}`;
 
   const getCreditColor = (type) => {
     console.log(type);
-    return type == 'DEDUCTION' ? 'error.main' : 'success.main';
+    return type === 'DEDUCTION' ? 'error.main' : 'success.main';
 
   }
 
@@ -55,7 +53,7 @@ export function CreditTableRow({ row, selected }) {
 
       {/* Status */}
       <TableCell>
-        <Label variant="soft" color={row.status == 'DEDUCTION' ? 'error' : 'success'}>
+        <Label variant="soft" color={row.status === 'DEDUCTION' ? 'error' : 'success'}>
           {row.status}
         </Label>
       </TableCell>

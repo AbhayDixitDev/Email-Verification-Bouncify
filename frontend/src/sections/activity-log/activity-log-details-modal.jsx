@@ -1,17 +1,18 @@
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
   Box,
-  Divider,
   Chip,
   Stack,
+  Button,
+  Dialog,
+  Divider,
   IconButton,
+  Typography,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
 } from '@mui/material';
 
+// eslint-disable-next-line import/no-unresolved
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------

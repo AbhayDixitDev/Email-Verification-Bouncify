@@ -104,7 +104,7 @@ export function DashboardChart({ title, subheader, showAlert, chart, handleAlert
   };
 
   const handleDownload = () => {
-    console.log(`Downloading ${selectedOption}`);
+    // console.log(`Downloading ${selectedOption}`);
     handleClose();
   };
 

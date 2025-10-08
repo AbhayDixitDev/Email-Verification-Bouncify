@@ -39,7 +39,7 @@ export const fetchActivityLogById = createAsyncThunk(
 // Create async thunk for fetching activity stats
 export const fetchActivityStats = createAsyncThunk(
   'activityLog/fetchActivityStats',
-  async (params = {}, { rejectWithValue }) => {
+  async ( { rejectWithValue }, params = {}) => {
     try {
       const response = await axiosInstance.get(endpoints.activityLog.stats, {
         params: {

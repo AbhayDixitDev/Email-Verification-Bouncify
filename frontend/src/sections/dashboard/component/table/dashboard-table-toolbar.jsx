@@ -1,6 +1,5 @@
-import { useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-
+import { useState, useCallback } from 'react';
 
 // MUI imports
 import {
@@ -20,12 +19,16 @@ import {
 
 import { toast } from 'sonner';
 
-// Components
+// eslint-disable-next-line import/no-unresolved
+import { fetchLists, bulkGetStatus } from 'src/redux/slice/listSlice';
+
+// eslint-disable-next-line import/no-unresolved
 import { Iconify } from 'src/components/iconify';
 
+// eslint-disable-next-line import/no-unresolved
 import { DeleteDialog } from 'src/sections/dialog-boxes/confirm-delete-dialog';
+// eslint-disable-next-line import/no-unresolved
 import { MoveToFolderPopover } from 'src/sections/dialog-boxes/move-to-folder-dailog';
-import { fetchLists, bulkGetStatus } from 'src/redux/slice/listSlice';
 
 // Constants
 const BUTTON_STYLES = (isBelow600px) => ({

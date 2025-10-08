@@ -170,7 +170,7 @@ export function DashboardTrashTable() {
   );
 
   useEffect(() => {
-    console.log(tableData);
+    // console.log(tableData);
   },[tableData])
 
   const filters = useSetState({
@@ -226,7 +226,7 @@ export function DashboardTrashTable() {
     // Allow popover for all statuses in trash table
     setAnchorEl(event.currentTarget);
     setSelectedRow(row);
-    console.log(row);
+    // console.log(row);
   };
 
   const handleClosePopover = () => {

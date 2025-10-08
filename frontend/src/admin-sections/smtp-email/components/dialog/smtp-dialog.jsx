@@ -60,7 +60,7 @@ export default function AddSmtpDialog({
   const theme = useTheme();
 
   useEffect(() => {
-    console.log('initialData:', initialData);
+    // console.log('initialData:', initialData);
     if (open) {
       if (mode === 'edit' && initialData) {
         const newFormData = {
@@ -73,7 +73,7 @@ export default function AddSmtpDialog({
           username: initialData.username || '',
           password: 'shdgjahsglklakg',
         };
-        console.log('Setting formData in edit mode:', newFormData);
+        // console.log('Setting formData in edit mode:', newFormData);
         setFormData(newFormData);
       } else {
         setFormData({
@@ -132,7 +132,7 @@ export default function AddSmtpDialog({
 
   const handleSubmit = () => {
     if (validateForm()) {
-      console.log('Submitting form:', formData);
+      // console.log('Submitting form:', formData);
       onClose();
       onSubmitSuccess(
         mode === 'edit'

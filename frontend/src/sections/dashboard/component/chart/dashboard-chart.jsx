@@ -1,24 +1,30 @@
-import { useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
 import { useTheme } from '@mui/material/styles';
 import CardHeader from '@mui/material/CardHeader';
 import { Box, Alert, Dialog, Button, Tooltip, Typography, DialogTitle } from '@mui/material';
-import { useDispatch } from 'react-redux';
 
+// eslint-disable-next-line import/no-unresolved
 import { fNumber } from 'src/utils/format-number';
 
+// eslint-disable-next-line import/no-unresolved
+import { downloadList } from 'src/redux/slice/listSlice';
+
+// eslint-disable-next-line import/no-unresolved
 import { Iconify } from 'src/components/iconify';
+// eslint-disable-next-line import/no-unresolved
 import { Scrollbar } from 'src/components/scrollbar';
+// eslint-disable-next-line import/no-unresolved
 import { Chart, useChart } from 'src/components/chart';
+// eslint-disable-next-line import/no-unresolved
 import { ChartLegends } from 'src/components/chart/chart-legends';
-import ProgessLinear from 'src/components/progress-bar/progessLinear';
+// eslint-disable-next-line import/no-unresolved
 import LearnMoreLink from 'src/components/learn-more-link/learn-more-link';
 
-import ChartAlert from './chart-alert';
-import { downloadList } from 'src/redux/slice/listSlice';
+
 
 export function DashboardChart({ title, subheader,jobId, showAlert, chart, handleAlertClose, details, onDownload, forceShowChart, ...other }) {
   const { isUploading, isUploaded, isStartVerification, isVerificationCompleted, progress } =
@@ -34,11 +40,7 @@ export function DashboardChart({ title, subheader,jobId, showAlert, chart, handl
   const [selectedOption, setSelectedOption] = useState('all-results');
 
 
-  useEffect(()=>{
-    console.log("Chart series:", chart?.series);
 
-
-  },[])
 
   const downloadActions = [
     {
@@ -102,7 +104,7 @@ export function DashboardChart({ title, subheader,jobId, showAlert, chart, handl
   });
 
   // Dialog handlers
-  const handleOpen = (mode, jobId) => {
+  const handleOpen = (mode) => {
     setDialog({ open: true, mode });
     setSelectedOption(mode); // Reset selection when opening dialog
     
@@ -114,7 +116,7 @@ export function DashboardChart({ title, subheader,jobId, showAlert, chart, handl
 
   const handleOptionSelect = (optionId) => {
     setSelectedOption(optionId);
-    console.log(selectedOption)
+    // console.log(selectedOption)
   };
 
   // const handleDownload = () => {
@@ -129,9 +131,9 @@ export function DashboardChart({ title, subheader,jobId, showAlert, chart, handl
     }
   
     // Call the parent's onDownload handler with the selected option
-    console.log(jobId);
+    // console.log(jobId);
     const res=await dispatch(downloadList({jobId,downloadType:selectedOption}));
-    console.log(res);
+    // console.log(res);
   };
 
   // Alert effects
@@ -154,7 +156,7 @@ export function DashboardChart({ title, subheader,jobId, showAlert, chart, handl
         'The email verification is in progress. The Verification in progress button will change to Download button once the verification is complete.',
         'Processing'
       );
-      setHasShownVerificationAlert(true);
+      // setHasShownVerificationAlert(true);
       alertTimeout = setTimeout(handleAlertClose, 5000);
     }
 
@@ -226,7 +228,7 @@ export function DashboardChart({ title, subheader,jobId, showAlert, chart, handl
                   sx={{ mt: { xs: '10px', sm: '0px' } }}
                   variant="outlined"
                   color="primary"
-                  onClick={() => handleOpen('download', jobId)}
+                  onClick={() => handleOpen('download')}
                   startIcon={<Iconify width={24} icon="solar:download-minimalistic-bold" />}
                 >
                   Download
@@ -236,7 +238,7 @@ export function DashboardChart({ title, subheader,jobId, showAlert, chart, handl
           </Box>
           <Divider />
 
-          {showChart && (
+          {true && (
             <>
               <Chart
                 type="donut"
@@ -269,8 +271,8 @@ export function DashboardChart({ title, subheader,jobId, showAlert, chart, handl
               />
             </>
           )}
-          {showChartAlert && <ChartAlert />}
-          {showProgressLinear && <ProgessLinear />}
+          {/* {showChartAlert && <ChartAlert />}
+          {showProgressLinear && <ProgessLinear />} */}
         </Card>
       </Scrollbar>
       <Alert

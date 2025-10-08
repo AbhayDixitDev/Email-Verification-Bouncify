@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
+// eslint-disable-next-line import/no-unresolved
 import { CONFIG } from 'src/config-global';
-import { DashboardContent } from 'src/layouts/app';
 
 import ActivityLogView from '../activity-log/activity-log-view';
 

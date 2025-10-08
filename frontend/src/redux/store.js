@@ -1,11 +1,11 @@
 // src/redux/store.js
 import { configureStore } from '@reduxjs/toolkit';
 
-import listNameReducer from './slice/listNameSlice';
-import userReducer from "./slice/userSlice"
-import fileUploadReducer from './slice/uploadSlice';
 import listReducer from './slice/listSlice'
+import userReducer from "./slice/userSlice"
 import creditReducer from './slice/creditSlice'
+import fileUploadReducer from './slice/uploadSlice';
+import listNameReducer from './slice/listNameSlice';
 import timeZoneReducer from './slice/timeZoneSlice';
 import activityLogReducer from './slice/activityLogSlice';
 

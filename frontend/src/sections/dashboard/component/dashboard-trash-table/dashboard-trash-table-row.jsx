@@ -16,10 +16,14 @@ import {
   Backdrop as MuiBackdrop,
 } from '@mui/material';
 
+// eslint-disable-next-line import/no-unresolved
 import { startVerification } from 'src/redux/slice/uploadSlice';
 
+// eslint-disable-next-line import/no-unresolved
 import { Label } from 'src/components/label';
+// eslint-disable-next-line import/no-unresolved
 import { Iconify } from 'src/components/iconify';
+// eslint-disable-next-line import/no-unresolved
 import { usePopover } from 'src/components/custom-popover';
 
 import { DashboardChart } from '../chart/dashboard-chart';
@@ -51,11 +55,11 @@ export function DashboardTrashTableRow({
   const dispatch = useDispatch();
 
   const showAlert = (type, title, message) => {
-    console.log(`Alert Type: ${type}, Title: ${title}, Message: ${message}`);
+    // console.log(`Alert Type: ${type}, Title: ${title}, Message: ${message}`);
   };
 
   const handleAlertClose = () => {
-    console.log('Alert closed');
+    // console.log('Alert closed');
   };
 
   const handleStartVerification = () => {
@@ -346,7 +350,7 @@ export function DashboardTrashTableRow({
           showAlert={showAlert}
           handleAlertClose={handleAlertClose}
           title={currentFile.name}
-          forceShowChart={true}
+          // forceShowChart={true}
           chart={{
             series: [
               { label: 'Deliverable Emails', value: row.report?.deliverable || 0 },
