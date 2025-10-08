@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
 
@@ -146,6 +146,10 @@ export function DashboardTableRow({
         return '';
     }
   };
+
+  useEffect(()=>{
+    console.log(row)
+  },[row])
 
   const renderPrimary = (
     <>
@@ -386,10 +390,10 @@ export function DashboardTableRow({
           jobId={row.jobId}
           chart={{
             series: [
-              { label: 'Deliverable Emails', value: row.report?.deliverable || 0 },
-              { label: 'Undeliverable Emails', value: row.report?.undeliverable || 0 },
-              { label: 'Accept-all Emails', value: row.report?.acceptAll || 0 },
-              { label: 'Unknown Emails', value: row.report?.unknown || 0 },
+              { label: 'Deliverable Emails', value: row.report?.results?.deliverable || 0 },
+              { label: 'Undeliverable Emails', value: row.report?.results?.undeliverable || 0 },
+              { label: 'Accept-all Emails', value: row.report?.results?.accept_all || 0 },
+              { label: 'Unknown Emails', value: row.report?.results?.unknown || 0 },
             ],
           }}
         />

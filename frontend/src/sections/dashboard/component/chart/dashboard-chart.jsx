@@ -33,6 +33,13 @@ export function DashboardChart({ title, subheader,jobId, showAlert, chart, handl
   });
   const [selectedOption, setSelectedOption] = useState('all-results');
 
+
+  useEffect(()=>{
+    console.log("Chart series:", chart?.series);
+
+
+  },[])
+
   const downloadActions = [
     {
       id: 'accept_all',

@@ -5,7 +5,7 @@ import axios, { endpoints } from 'src/utils/axios';
 // Define the async thunk for fetching credits history
 export const fetchCreditsHistory = createAsyncThunk(
     'credits/fetchCreditsHistory',
-    async (params = {}, { rejectWithValue }) => {
+    async ({ rejectWithValue },params = {}) => {
         try {
             const { data } = await axios.get(endpoints.credit.getHistory, { params });
             return data?.data || [];

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
@@ -51,6 +51,10 @@ export function EmailListTableRow({
   const showAlert = (type, title, message) => {
     console.log(`Alert Type: ${type}, Title: ${title}, Message: ${message}`);
   };
+
+  useEffect(()=>{
+console.log(row)
+  },[])
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 

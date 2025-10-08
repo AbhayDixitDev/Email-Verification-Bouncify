@@ -2,8 +2,8 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import listNameReducer from './slice/listNameSlice';
-import fileUploadReducer from './slice/uploadSlice';
 import userReducer from "./slice/userSlice"
+import fileUploadReducer from './slice/uploadSlice';
 import listReducer from './slice/listSlice'
 import creditReducer from './slice/creditSlice'
 import timeZoneReducer from './slice/timeZoneSlice';

@@ -294,7 +294,7 @@ export function JwtSignUpView() {
               }}
             >
               <Typography variant="body2">
-                <b>Email Sent!</b> We've re-sent the email! Please allow a few moments, and don't forget to check your spam or junk folder if it's missing.
+                <b>Email Sent!</b> We&apos;ve re-sent the email! Please allow a few moments, and don't forget to check your spam or junk folder if it's missing.
               </Typography>
             </Alert>
           )}

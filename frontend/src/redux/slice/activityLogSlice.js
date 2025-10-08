@@ -5,7 +5,7 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 // Create async thunk for fetching activity logs
 export const fetchActivityLogs = createAsyncThunk(
   'activityLog/fetchActivityLogs',
-  async (params = {}, { rejectWithValue }) => {
+  async ( { rejectWithValue }, params = {}) => {
     try {
       const response = await axiosInstance.get(endpoints.activityLog.list, {
         params: {

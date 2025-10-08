@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
 import {Helmet} from 'react-helmet-async';
+import {useDispatch, useSelector} from 'react-redux';
 
 import {
     Box,
