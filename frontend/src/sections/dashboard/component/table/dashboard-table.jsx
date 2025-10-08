@@ -168,6 +168,14 @@ export function DashboardTable() {
     if (status === 'FAILED') return 'Failed';
   };
 
+  const statusUiMap = {
+    COMPLETED: "Verified",
+    PROCESSING: "processing",
+    UNPROCESSED: "Unverified",
+    FAILED: "Failed"
+  };
+  
+
   const uiToBackendStatus = (ui) => {
     if (ui === 'Verified') return 'COMPLETED';
     if (ui === 'processing') return 'PROCESSING';
@@ -212,6 +220,13 @@ export function DashboardTable() {
     console.log(tableData);
   },[tableData])
 
+  const { stats } = listState.data;
+const unprocessedCount = stats?.UNPROCESSED || 0;
+const completedCount = stats?.COMPLETED || 0;
+const processingCount = stats?.PROCESSING || 0;
+const totalCount = listState.data.pagination?.total || 0;
+
+
   const [processingRowId, setProcessingRowId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -220,29 +235,27 @@ export function DashboardTable() {
   const isStartVerification = useSelector((state) => state.fileUpload.isStartVerification);
   const isVerificationCompleted = useSelector((state) => state.fileUpload.isVerificationCompleted);
 
+  
+
   // Update tableData when listState changes
   useEffect(() => {
-    setTableData((listState?.data?.listData || []).map((item, index) => ({
-      id: item._id || index,
-      status: backendToUiStatus(item.status),
-      name: item.listName || item.filename || 'Untitled List',
-      numberOfEmails: item.totalEmails || 0,
-      creditconsumed:
-        item.status === 'COMPLETED'
-          ? `${item?.report?.verified || item.totalEmails || 0} Credit Consumed`
-          : '0 Credit Consumed',
-      date: formatDateWithTimezone(item.createdAt || item.uploadedAt),
-      jobId: item.jobId,
-      report: {
-        deliverable: item?.report?.results?.deliverable || 0,
-        undeliverable: item?.report?.results?.undeliverable || 0,
-        acceptAll: item?.report?.results?.accept_all || 0,
-        unknown: item?.report?.results?.unknown || 0,
-        verified: item?.report?.verified || 0,
-      },
-    })));
-    
+    setTableData(
+      listState?.data?.listData?.map((item, index) => ({
+        id: item._id || index,
+        status: statusUiMap[item.status] || item.status,
+        name: item.listName || item.filename || "Untitled List",
+        numberOfEmails: item.totalEmails || 0,
+        creditconsumed:
+          item.status === "COMPLETED"
+            ? `${item?.report?.verified || item.totalEmails || 0} Credit Consumed`
+            : "0 Credit Consumed",
+        date: formatDateWithTimezone(item.createdAt || item.uploadedAt),
+        jobId: item.jobId,
+        report: item.report || {},
+      }))
+    );
   }, [listState?.data?.listData]);
+  
 
   // Fetch lists from backend when filters or pagination change
   useEffect(() => {
@@ -303,10 +316,19 @@ export function DashboardTable() {
   const handleFilterStatus = useCallback(
     (event, newValue) => {
       table.onResetPage();
-      filters.setState({ status: newValue });
+      filters.setState({ status: newValue }); // newValue is UI status, e.g. 'Verified'
+      dispatch(
+        fetchLists({
+          page: 1,
+          limit: table.rowsPerPage,
+          search: filters.state.name,
+          status: newValue === "all" ? "" : uiToBackendStatus(newValue), // map UI to backend status
+        })
+      );
     },
-    [filters, table]
+    [dispatch, filters, table.rowsPerPage, filters.state.name]
   );
+  
 
   const handleOpenPopover = (event, row) => {
     if (row.status !== 'processing') {
@@ -351,7 +373,16 @@ export function DashboardTable() {
   };
 
   // Computed values - use backend data directly since pagination is handled server-side
-  const dataFiltered = tableData; // Backend already filters and paginates
+  // const dataFiltered = tableData; // Backend already filters and paginates
+  const dataFiltered =
+  filters.state.status === "all"
+    ? tableData
+    : tableData.filter(
+        (row) => {
+          if (filters.state.status === "all") return true;
+          return row.status === filters.state.status;
+        }
+      );
 
   useEffect(() => {
     console.log('Table state:', {
@@ -396,45 +427,49 @@ export function DashboardTable() {
       <Divider />
 
       <Tabs
-        value={filters.state.status}
-        onChange={handleFilterStatus}
-        sx={{
-          px: 2.5,
-          boxShadow: `inset 0 -2px 0 0 ${varAlpha(theme.vars.palette.grey['500Channel'], 0.08)}`,
-        }}
-      >
-        {STATUS_OPTIONS.map((tab) => (
-          <Tab
-            key={tab.value}
-            iconPosition="end"
-            value={tab.value}
-            label={
-              <Tooltip disableInteractive placement="top" arrow title={tab.tooltip}>
-                <span>{tab.label}</span>
-              </Tooltip>
+  value={filters.state.status}
+  onChange={handleFilterStatus}
+  sx={{
+    px: 2.5,
+    boxShadow: `inset 0 -2px 0 0 ${varAlpha(theme.vars.palette.grey['500Channel'], 0.08)}`,
+  }}
+>
+  {STATUS_OPTIONS.map((tab) => {
+    let count = 0;
+    if (tab.value === 'all') count = totalCount;
+    else if (tab.value === 'Unverified') count = unprocessedCount;
+    else if (tab.value === 'Verified') count = completedCount;
+    else if (tab.value === 'processing') count = processingCount;
+    else count = 0;
+
+    return (
+      <Tab
+        key={tab.value}
+        iconPosition="end"
+        value={tab.value}
+        label={
+          <Tooltip disableInteractive placement="top" arrow title={tab.tooltip}>
+            <span>{`${tab.label} `}</span>
+          </Tooltip>
+        }
+        icon={
+          <Label
+            variant={(tab.value === filters.state.status && 'filled') || 'soft'}
+            color={
+              (tab.value === 'Verified' && 'success') ||
+              (tab.value === 'processing' && 'info') ||
+              (tab.value === 'Unverified' && 'error') ||
+              'default'
             }
-            icon={
-              <Label
-                variant={
-                  ((tab.value === 'all' || tab.value === filters.state.status) && 'filled') ||
-                  'soft'
-                }
-                color={
-                  (tab.value === 'Verified' && 'success') ||
-                  (tab.value === 'processing' && 'info') ||
-                  (tab.value === 'uploading' && 'warning') ||
-                  (tab.value === 'Unverified' && 'error') ||
-                  'default'
-                }
-              >
-                {['Verified', 'processing', 'uploading', 'Unverified'].includes(tab.value)
-                  ? tableData.filter((user) => user.status === tab.value).length
-                  : tableData.length}
-              </Label>
-            }
-          />
-        ))}
-      </Tabs>
+          >
+            {count}
+          </Label>
+        }
+      />
+    );
+  })}
+</Tabs>
+
 
       <DashboardTableToolbar
         filters={filters}

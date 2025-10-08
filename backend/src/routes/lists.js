@@ -15,6 +15,9 @@ router.get("/", ListController.getAllList);
 // Routes for getting the status of a bulk email list
 router.get("/get-status", ListController.getStatus);
 
+// Routes for getting the status of a bulk email list
+router.get("/bulk-get-status", ListController.bulkGetStatus);
+
 // Routes for getting details of a specific list
 router.get("/:listId", ListController.getListById);
 

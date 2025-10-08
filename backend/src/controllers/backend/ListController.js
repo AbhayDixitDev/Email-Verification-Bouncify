@@ -29,119 +29,117 @@ module.exports = {
     getAllList: async (req, res) => {
         const userId = req?.user?.id;
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10; 
+        const limit = parseInt(req.query.limit) || 10;
         const search = req.query.search || "";
-        const status = Status[req.query.status] || "";
+        const statusParam = req.query.status;
+        const status = Status[statusParam] || ""; // Map UI status to backend or empty string for all
         const skip = (page - 1) * limit;
-    
+      
         try {
-            // Base filter criteria for both collections
-            const baseFilterCriteria = { userId };
-    
-            // Build search criteria for both collections
-            const emailListSearchCriteria = { ...baseFilterCriteria };
-            const emailValidationSearchCriteria = { ...baseFilterCriteria };
-    
-            if (search) {
-                emailListSearchCriteria.listName = { $regex: search, $options: "i" };
-                emailValidationSearchCriteria.email = { $regex: search, $options: "i" };
+          const baseFilterCriteria = { userId };
+      
+          const emailListSearchCriteria = { ...baseFilterCriteria };
+          const emailValidationSearchCriteria = { ...baseFilterCriteria };
+      
+          if (search) {
+            emailListSearchCriteria.listName = { $regex: search, $options: "i" };
+            emailValidationSearchCriteria.email = { $regex: search, $options: "i" };
+          }
+      
+          // Only add status filter if status is provided and not "all"
+          if (statusParam && statusParam !== "all" && status) {
+            emailListSearchCriteria.status = status.toUpperCase();
+            emailValidationSearchCriteria.status = status.toUpperCase();
+          }
+      
+          // Fetch data from both collections based on filters
+          const [emailListData, emailValidationData] = await Promise.all([
+            EmailList.find(emailListSearchCriteria).sort({ createdAt: -1 }).lean(),
+            EmailValidation.find(emailValidationSearchCriteria).sort({ createdAt: -1 }).lean()
+          ]);
+      
+          // Transform EmailValidation data to match EmailList structure
+          const transformedEmailValidationData = emailValidationData.map((item) => ({
+            _id: item._id,
+            userId: item.userId,
+            listName: `Single: ${item.email}`,
+            jobId: `single_${item._id}`,
+            totalEmails: 1,
+            status: "COMPLETED",
+            report: {
+              status: item.status || '',
+              total: 1,
+              verified: item.status === 'COMPLETED' ? 1 : 0,
+              pending: item.status === 'PROCESSING' ? 1 : 0,
+              analysis: {},
+              results: {
+                deliverable: (item.result?.result === "deliverable") ? 1 : 0,
+                undeliverable: (item.result?.result === "undeliverable") ? 1 : 0,
+                accept_all: 0,
+                unknown: item.result?.unknown || 0
+              }
+            },
+            createdAt: item.createdAt,
+            __v: item.__v,
+            isSingleEmail: true // Mark to differentiate single emails
+          }));
+      
+          // Combine both datasets for unified list
+          const combinedData = [...emailListData, ...transformedEmailValidationData];
+      
+          // Sort combined data by creation date descending
+          combinedData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+          // Pagination calculation
+          const total = combinedData.length;
+          const totalPages = Math.ceil(total / limit);
+          const listData = combinedData.slice(skip, skip + limit);
+      
+          // Calculate counts per status from combinedData for tabs stats
+          const statusCounts = combinedData.reduce((acc, item) => {
+            const stat = item.status || 'UNPROCESSED';
+            acc[stat] = (acc[stat] || 0) + 1;
+            return acc;
+          }, {});
+      
+          // Total Emails calculation
+          const totalEmails = combinedData.reduce((sum, item) => sum + (item.totalEmails || 0), 0);
+      
+          // Total Credits calculation considering single emails
+          const totalCreditsUsed = combinedData.reduce((sum, item) => {
+            if (item.isSingleEmail) {
+              return sum + (item.status === 'COMPLETED' ? 1 : 0);
             }
-    
-            // Add status filter if provided
-            if (status) {
-                emailListSearchCriteria.status = status.toUpperCase();
-                emailValidationSearchCriteria.status = status.toUpperCase();
+            return sum + (item.report?.verified || 0);
+          }, 0);
+      
+          res.status(200).json({
+            success: true,
+            message: "Email lists fetched successfully",
+            data: {
+              listData,
+              total,
+              page,
+              limit,
+              totalPages,
+              stats: {
+                ...statusCounts,
+                totalEmails,
+                totalCreditsUsed
+              }
             }
-    
-            // Get data from both collections
-            const [emailListData, emailValidationData] = await Promise.all([
-                EmailList.find(emailListSearchCriteria).sort({ createdAt: -1 }).lean(),
-                EmailValidation.find(emailValidationSearchCriteria).sort({ createdAt: -1 }).lean()
-            ]);
-    
-            // Transform EmailValidation data to match EmailList structure
-            const transformedEmailValidationData = emailValidationData.map((item, index) => ({
-                _id: item._id,
-                userId: item.userId,
-                listName: `Single: ${item.email}`,
-                jobId: `single_${item._id}`,
-                totalEmails: 1,
-                status: "COMPLETED" ,
-                report: {
-                    status: item.status || '',
-                    total: 1,
-                    verified: item.status === 'COMPLETED' ? 1 : 0,
-                    pending: item.status === 'PROCESSING' ? 1 : 0,
-                    analysis: {},
-                    results: {
-                        deliverable: item.result?.result=="deliverable" ? 1: 0 || 0,
-                        undeliverable: item.result?.result=="undeliverable"? 1: 0 || 0,
-                        accept_all:  0,
-                        unknown: item.result?.unknown || 0
-                    }
-                },
-                createdAt: item.createdAt,
-                __v: item.__v,
-                isSingleEmail: true // Flag to identify single email validations
-            }));
-    
-            // Combine both datasets
-            const combinedData = [...emailListData, ...transformedEmailValidationData];
-    
-            // Sort combined data by creation date (newest first)
-            combinedData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    
-            // Get total count for pagination
-            const total = combinedData.length;
-            const totalPages = Math.ceil(total / limit);
-    
-            // Apply pagination to combined data
-            const listData = combinedData.slice(skip, skip + limit);
-    
-            // Get status counts from combined data
-            const statusCounts = combinedData.reduce((acc, item) => {
-                const status = item.status || 'UNPROCESSED';
-                acc[status] = (acc[status] || 0) + 1;
-                return acc;
-            }, {});
-    
-            // Calculate other stats from combined data
-            const totalEmails = combinedData.reduce((sum, item) => sum + (item.totalEmails || 0), 0);
-            const totalCreditsUsed = combinedData.reduce((sum, item) => {
-                if (item.isSingleEmail) {
-                    return sum + (item.status === 'COMPLETED' ? 1 : 0);
-                }
-                return sum + (item.report?.verified || 0);
-            }, 0);
-    
-            const response = {
-                success: true,
-                message: "Email lists fetched successfully",
-                data: {
-                    listData,
-                    total,
-                    page,
-                    limit,
-                    totalPages,
-                    stats: {
-                        ...statusCounts,
-                        totalEmails,
-                        totalCreditsUsed
-                    }
-                }
-            };
-    
-            res.status(200).json(response);
-    
+          });
+      
         } catch (error) {
-            console.error("Error fetching email lists:", error);
-            res.status(500).json({
-                success: false,
-                message: "There was an error while fetching email lists",
-                error: error.message
-            });
+          console.error("Error fetching email lists:", error);
+          res.status(500).json({
+            success: false,
+            message: "There was an error while fetching email lists",
+            error: error.message
+          });
         }
-    },
+      },
+      
 
     /**
     * Get The Single List 
@@ -462,7 +460,74 @@ module.exports = {
             return res.status(500).json(Response.error('Internal Server Error'));
         }
     },
-    
+    /**
+     * Get The Status Of Bulk Email List for all entries
+     * @param {*} req 
+     * @param {*} res 
+     */
+    bulkGetStatus: async (req, res) => {
+        const userId = req?.user?.id;
+      
+        try {
+          // Fetch all email lists for this user - only necessary fields for performance
+          const emailLists = await EmailList.find({ userId }, { jobId: 1, status: 1, listName: 1, report: 1 }).lean();
+      
+          // Process all lists concurrently - await Promise.all
+          const results = await Promise.all(
+            emailLists.map(async (list) => {
+              try {
+                const response = await getBulkStatus(list.jobId);
+                if (!response || !response.status) {
+                  throw new Error(`Status not found for jobId: ${list.jobId}`);
+                }
+      
+                const updatedStatus = BouncifyStatus[response.status.toLowerCase()] || "UNPROCESSED";
+      
+                // Deduct credits only once when status changes to COMPLETED
+                if (updatedStatus === "COMPLETED" && list.status !== "COMPLETED") {
+                  await CreditService.deductCredits(
+                    userId,
+                    response?.verified || 0,
+                    `Used In Verifying "${list.listName}" List`,
+                    "VERIFIED_LIST"
+                  );
+                }
+      
+                const updatedReport = {
+                  status: response.status,
+                  total: response.total || 0,
+                  verified: response.verified || 0,
+                  pending: response.pending || 0,
+                  analysis: response.analysis || {},
+                  results: response.results || {},
+                };
+      
+                // Update DB if status has changed
+                if (updatedStatus !== list.status) {
+                  const updatedDoc = await EmailList.findOneAndUpdate(
+                    { jobId: list.jobId },
+                    { $set: { status: updatedStatus, ...updatedReport } },
+                    { new: true }
+                  );
+                  return updatedDoc || list;
+                }
+                return list; // No change, return existing
+      
+              } catch (error) {
+                Logs.error(`Failed to update status for jobId ${list.jobId}: ${error.message}`);
+                return { jobId: list.jobId, error: error.message };
+              }
+            })
+          );
+      
+          res.status(200).json(Response.success("Bulk email list statuses updated", results));
+      
+        } catch (error) {
+          Logs.error("Error in bulkGetStatus:", error);
+          res.status(500).json(Response.error("Internal Server Error"));
+        }
+      },
+
 
     /**
      * Delete The  Bulk Email List

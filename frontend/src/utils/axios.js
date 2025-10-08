@@ -80,7 +80,8 @@ export const endpoints = {
     get: "/lists",
     delete: "/lists",
     chart: "/lists/stats",
-    download: "/lists/download"
+    download: "/lists/download",
+    bulkGetStatus: "/lists/bulk-get-status"
   },
   credit: {
     getBalance: "credits/balance",

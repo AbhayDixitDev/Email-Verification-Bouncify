@@ -25,6 +25,7 @@ import { Iconify } from 'src/components/iconify';
 
 import { DeleteDialog } from 'src/sections/dialog-boxes/confirm-delete-dialog';
 import { MoveToFolderPopover } from 'src/sections/dialog-boxes/move-to-folder-dailog';
+import { fetchLists, bulkGetStatus } from 'src/redux/slice/listSlice';
 
 // Constants
 const BUTTON_STYLES = (isBelow600px) => ({
@@ -59,6 +60,7 @@ export function DashboardTableToolbar({ filters, onResetPage, numSelected }) {
 
   const [moveFolderOpen, setMoveFolderOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+
 
 
   // Computed values
@@ -103,8 +105,9 @@ export function DashboardTableToolbar({ filters, onResetPage, numSelected }) {
     setDeleteOpen(false);
   };
 
-  const handleRefresh = () => {
-    dispatch();
+  const handleRefresh = async () => {
+    await dispatch(bulkGetStatus());
+    dispatch(fetchLists());
   };
 
 

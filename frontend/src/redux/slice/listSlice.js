@@ -159,12 +159,17 @@ export const pollJobStatus = createAsyncThunk(
           if (status === 'COMPLETED') {
             dispatch(deductCredit({ amount: response?.data?.data?.totalEmails }))
           }
+          dispatch(fetchLists());
           resolve(response.data);
         } else if (status === 'UNPROCESSED') {
           // keep polling until it becomes ready -> start -> verifying -> completed
-          setTimeout(() => poll(resolve, reject), 4000);
+          // setTimeout(() => poll(resolve, reject), 4000);
+          dispatch(fetchLists());
+          throw new Error('List Verification is not completed');
         } else {
-          setTimeout(() => poll(resolve, reject), 4000);
+          // setTimeout(() => poll(resolve, reject), 4000);
+          dispatch(fetchLists());
+          throw new Error('List Verification is not completed');
         }
       } catch (error) {
         reject(rejectWithValue(error.response?.data || error.message));
@@ -174,6 +179,19 @@ export const pollJobStatus = createAsyncThunk(
     return new Promise(poll);
   }
 );
+
+export const bulkGetStatus = createAsyncThunk(
+  'list/bulkGetStatus',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(endpoints.list.bulkGetStatus);
+      return response.data; // Ideally { success, message, data: [...] } returned from API
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 
 const listSlice = createSlice({
   name: 'list',
@@ -236,7 +254,33 @@ const listSlice = createSlice({
       state.chartValues = action.payload;
     }
   }, extraReducers: (builder) => {
+
     builder
+    .addCase(bulkGetStatus.pending, (state) => {
+    state.loading = true;
+    state.error = null;
+    })
+    .addCase(bulkGetStatus.fulfilled, (state, action) => {
+    state.loading = false;
+    // Assuming response.data is updated list array from backend
+    const updatedLists = action.payload?.data || [];
+    state.data.listData = updatedLists;
+
+    // Optionally re-calculate filtered lists
+    state.completedLists = updatedLists.filter(list => list?.status === 'COMPLETED');
+    state.unprocessedLists = updatedLists.filter(list => list?.status === 'UNPROCESSED');
+    state.processingLists = updatedLists.filter(list => list?.status === 'PROCESSING');
+
+    // Reset selectedList if needed
+    if (state.completedLists.length > 0) {
+      state.selectedList = state.completedLists[0];
+    }
+  })
+  .addCase(bulkGetStatus.rejected, (state, action) => {
+    state.loading = false;
+    state.error = action.payload || action.error.message;
+  })
+
       // upload list
       .addCase(uploadList.pending, (state) => {
         state.loading = true;

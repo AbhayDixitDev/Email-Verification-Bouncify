@@ -24,7 +24,9 @@ import { Iconify } from 'src/components/iconify';
 import { usePopover } from 'src/components/custom-popover';
 
 import { DashboardChart } from '../chart/dashboard-chart';
-import { startBulkVerification } from 'src/redux/slice/listSlice';
+import { startBulkVerification, pollJobStatus, fetchLists } from 'src/redux/slice/listSlice';
+
+import { toast } from 'sonner';
 
 // Custom backdrop for transparent background
 const CustomBackdrop = (props) => (
@@ -46,6 +48,8 @@ export function DashboardTableRow({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [alertState, setAlertState] = useState(null);
 
+  
+
   const csvfilesname = [{ name: row.name, numberOfEmails: row.numberOfEmails }];
   const timezone = '(UTC+05:30) Asia/Kolkata';
   const currentFile = csvfilesname[dashboardTableIndex % csvfilesname.length];
@@ -66,24 +70,48 @@ export function DashboardTableRow({
     dispatch(startVerification());
   };
 
-  const handleAction = () => {
-    switch (row.status) {
-      case 'Unverified':
-        onStartVerification();
-        if (!row.requiresCredits) {
-          dispatch(startBulkVerification(row.jobId));
+  const handleAction = async () => {
+    try {
+      switch (row.status) {
+        case 'Unverified':
+          onStartVerification?.();
+          if (!row.requiresCredits) {
+            const toastId = toast.loading('Starting verification...');
+            try {
+              await dispatch(startBulkVerification(row.jobId)).unwrap();
+              toast.success('Verification started successfully!', { id: toastId });
+              // Start polling for status update
+              await dispatch(pollJobStatus({ jobId: row.jobId }));
+              // Refresh the lists after successful verification start
+              await dispatch(fetchLists());
+            } catch (error) {
+              toast.error(error?.message || 'Failed to start verification', { id: toastId });
+            }
+          }
+          break;
+        case 'processing':
+          const processingToastId = toast.loading('Checking status...');
+          try {
+            await dispatch(pollJobStatus({ jobId: row.jobId })).unwrap();
+            // await dispatch(fetchLists());
+            toast.dismiss(processingToastId);
+            setIsDrawerOpen(true);
+          } catch (error) {
+            toast.error(error?.message || 'Email list verification is in progress', { id: processingToastId });
+          }
+          break;
+        case 'Verified':
           setIsDrawerOpen(true);
-        }
-        break;
-      case 'Verified':
-        setIsDrawerOpen(true);
-        break;
-      case 'processing':
-      case 'uploading':
-        setIsDrawerOpen(true);
-        break;
-      default:
-        break;
+          break;
+        case 'uploading':
+          setIsDrawerOpen(true);
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.error('Error in handleAction:', error);
+      toast.error('An error occurred while processing your request');
     }
   };
 
@@ -109,7 +137,7 @@ export function DashboardTableRow({
       case 'Verified':
         return 'View Report';
       case 'processing':
-        return 'Verification In Progress';
+        return 'Check Status';
       case 'uploading':
         return 'Uploading';
       case 'Unverified':
@@ -269,7 +297,7 @@ export function DashboardTableRow({
                 row.status === 'processing'
                   ? 'Verification in progress. Please wait.'
                   : row.status === 'Verified'
-                    ? 'Click to download report.'
+                    ? 'Click to check status.'
                     : 'Click to start verification.'
               }
               arrow
